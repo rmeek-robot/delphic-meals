@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Delphic Club — Meal Sign-Ups v5</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Crimson+Pro:wght@400;500;600;700&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F5F3EF;
+    --bg-deep: #EDEAE4;
+    --surface: #FFFFFF;
+    --surface2: #F8F7F4;
+    --surface3: #F0EDE8;
+    --border: #D4CFC6;
+    --border-light: #BFB9AD;
+    --text: #2C2C2C;
+    --text-bright: #1A1A1A;
+    --text-dim: #7A7468;
+    --accent: #8B6914;
+    --accent-muted: #A47E1E;
+    --accent-glow: #8B691408;
+    --accent-glow2: #8B691412;
+    --green: #3D7A4E;
+    --red: #B14242;
+    --orange: #B07A2A;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Jost', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+  }
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background: radial-gradient(ellipse at 15% 10%, #8B691406 0%, transparent 50%),
+                radial-gradient(ellipse at 85% 90%, #D4CFC620 0%, transparent 50%);
+    pointer-events: none; z-index: 0;
+  }
+  .app { position: relative; z-index: 1; max-width: 680px; margin: 0 auto; padding: 24px 16px 80px; }
+
+  .header { text-align: center; padding: 48px 0 36px; margin-bottom: 32px; }
+  .header-rule { width: 60px; height: 1px; background: linear-gradient(90deg, transparent, var(--accent-muted), transparent); margin: 0 auto 20px; }
+  .header-badge { display: inline-block; font-size: 10px; font-weight: 500; letter-spacing: 3.5px; text-transform: uppercase; color: var(--accent); border: 1px solid var(--border); padding: 6px 20px; border-radius: 2px; margin-bottom: 24px; }
+  .header h1 { font-family: 'Cormorant Garamond', serif; font-size: 44px; font-weight: 600; letter-spacing: 0.5px; color: var(--text-bright); margin-bottom: 12px; line-height: 1.1; }
+  .header p { font-family: 'Crimson Pro', serif; color: var(--text-dim); font-size: 16px; line-height: 1.6; font-style: italic; max-width: 420px; margin: 0 auto; }
+
+  .tabs { display: flex; gap: 0; margin-bottom: 32px; border-bottom: 1px solid var(--border); }
+  .tab { flex: 1; padding: 14px 8px; text-align: center; cursor: pointer; font-size: 13px; font-weight: 500; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-dim); transition: all .25s; border: none; background: transparent; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .section { display: none; animation: fadeUp .4s ease; }
+  .section.active { display: block; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  .field { margin-bottom: 24px; }
+  .field-label { display: block; font-size: 11px; font-weight: 500; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 10px; }
+  .field-label .req { color: var(--red); }
+
+  input[type="text"], input[type="number"], input[type="date"], textarea, select {
+    width: 100%; padding: 13px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 4px; color: var(--text-bright); font-family: 'Crimson Pro', serif; font-size: 16px; transition: border-color .2s, box-shadow .2s; outline: none;
+  }
+  input:focus, textarea:focus, select:focus { border-color: var(--accent-muted); box-shadow: 0 0 0 2px var(--accent-glow); }
+  textarea { resize: vertical; min-height: 72px; }
+  select { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%237A8599' viewBox='0 0 16 16'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
+  select option { background: var(--surface); color: var(--text); }
+
+  .option-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+  .option-pill { position: relative; cursor: pointer; }
+  .option-pill input { position: absolute; opacity: 0; pointer-events: none; }
+  .option-pill .pill-label { display: inline-block; padding: 9px 16px; border-radius: 3px; border: 1px solid var(--border); background: var(--surface); font-family: 'Jost', sans-serif; font-size: 13px; font-weight: 400; color: var(--text-dim); transition: all .2s; user-select: none; letter-spacing: .3px; }
+  .option-pill input:checked + .pill-label { border-color: var(--accent-muted); background: var(--accent-glow2); color: var(--accent); }
+  .option-pill:hover .pill-label { border-color: var(--border-light); color: var(--text); }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 24px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,.04); }
+  .card-title { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 600; color: var(--text-bright); margin-bottom: 4px; }
+  .card-sub { font-family: 'Crimson Pro', serif; color: var(--text-dim); font-size: 14px; font-style: italic; margin-bottom: 20px; }
+
+  .day-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(125px, 1fr)); gap: 10px; margin-bottom: 24px; }
+  .day-card { border: 1px solid var(--border); border-radius: 4px; padding: 16px 12px; cursor: pointer; transition: all .2s; background: var(--surface); text-align: center; }
+  .day-card:hover { border-color: var(--border-light); background: var(--surface2); }
+  .day-card.selected { border-color: var(--accent-muted); background: var(--accent-glow2); }
+  .day-card.full { border-color: var(--red); opacity: .4; cursor: not-allowed; }
+  .day-card .day-name { font-family: 'Cormorant Garamond', serif; font-weight: 600; font-size: 16px; color: var(--text-bright); margin-bottom: 1px; }
+  .day-card .day-meal { font-size: 10px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); }
+  .day-card .day-date { font-size: 12px; color: var(--text-dim); margin-top: 4px; }
+  .day-card .day-spots { font-size: 10px; font-weight: 500; letter-spacing: .5px; margin-top: 8px; padding: 3px 8px; border-radius: 2px; display: inline-block; }
+  .day-card .day-spots.open { background: #3D7A4E12; color: var(--green); }
+  .day-card .day-spots.almost { background: #B07A2A12; color: var(--orange); }
+  .day-card .day-spots.full-tag { background: #B1424212; color: var(--red); }
+
+  .time-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .time-chip { flex: 1; min-width: 120px; padding: 14px; border-radius: 4px; border: 1px solid var(--border); background: var(--surface); cursor: pointer; text-align: center; transition: all .2s; }
+  .time-chip:hover { border-color: var(--border-light); }
+  .time-chip.selected { border-color: var(--accent-muted); background: var(--accent-glow2); }
+  .time-chip.disabled { opacity: .35; cursor: not-allowed; pointer-events: none; }
+  .time-chip .time-label { font-family: 'Cormorant Garamond', serif; font-weight: 600; font-size: 16px; color: var(--text-bright); }
+  .time-chip .time-spots { font-size: 11px; color: var(--text-dim); margin-top: 3px; }
+
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 13px 28px; border-radius: 3px; font-family: 'Jost', sans-serif; font-size: 13px; font-weight: 500; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; transition: all .2s; border: none; }
+  .btn-primary { background: var(--accent); color: var(--bg-deep); width: 100%; }
+  .btn-primary:hover { background: var(--accent-muted); }
+  .btn-secondary { background: transparent; color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover { border-color: var(--border-light); background: var(--surface2); }
+  .btn:disabled { opacity: .35; cursor: not-allowed; }
+
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--green); color: #fff; padding: 12px 24px; border-radius: 3px; font-weight: 500; font-size: 13px; z-index: 999; transition: transform .4s cubic-bezier(.36,.66,.04,1); pointer-events: none; }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  .setting-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid var(--border); }
+  .setting-row:last-child { border-bottom: none; }
+  .setting-info { flex: 1; }
+  .setting-name { font-family: 'Crimson Pro', serif; font-weight: 600; font-size: 15px; color: var(--text-bright); }
+  .setting-desc { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+  .setting-row input[type="number"] { width: 72px; text-align: center; font-size: 14px; }
+
+  .info-banner { background: #5B8DEF08; border: 1px solid #5B8DEF20; border-radius: 4px; padding: 14px 18px; font-family: 'Crimson Pro', serif; font-size: 14px; color: #3B6BC4; margin-bottom: 20px; line-height: 1.5; }
+  .menu-display { background: var(--surface2); border-radius: 4px; padding: 12px 16px; margin-bottom: 16px; font-family: 'Crimson Pro', serif; font-size: 14px; line-height: 1.6; color: var(--text-dim); border-left: 2px solid var(--accent-muted); }
+  .menu-display strong { color: var(--text-bright); }
+
+  .signup-list { margin-top: 6px; }
+  .signup-item { display: flex; align-items: center; justify-content: space-between; padding: 9px 12px; border-radius: 3px; background: var(--surface); border: 1px solid var(--border); margin-bottom: 5px; font-size: 13px; }
+  .signup-item .name { font-family: 'Crimson Pro', serif; font-weight: 600; font-size: 15px; }
+  .signup-item .meta { color: var(--text-dim); font-size: 12px; }
+  .remove-btn { background: none; border: none; color: var(--red); cursor: pointer; font-size: 16px; padding: 0 4px; opacity: .6; transition: opacity .2s; }
+  .remove-btn:hover { opacity: 1; }
+
+  .tag { display: inline-block; padding: 2px 10px; border-radius: 2px; font-size: 10px; font-weight: 500; letter-spacing: 1px; text-transform: uppercase; }
+  .tag-green { background: #3D7A4E12; color: var(--green); }
+  .tag-orange { background: #B07A2A12; color: var(--orange); }
+  .tag-red { background: #B1424212; color: var(--red); }
+
+  .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(0,0,0,.15); border-top-color: var(--accent); border-radius: 50%; animation: spin .6s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .setup-card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 28px 24px; margin-bottom: 24px; }
+  .setup-card h2 { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 600; color: var(--text-bright); margin-bottom: 8px; }
+  .setup-card p { font-family: 'Crimson Pro', serif; color: var(--text-dim); font-size: 14px; line-height: 1.6; margin-bottom: 16px; font-style: italic; }
+  .setup-card code { background: var(--surface2); padding: 2px 8px; border-radius: 2px; font-size: 13px; color: var(--accent); }
+  .setup-card ol { padding-left: 20px; color: var(--text-dim); font-family: 'Crimson Pro', serif; font-size: 14px; line-height: 2; }
+  .url-input-group { display: flex; gap: 8px; }
+  .url-input-group input { flex: 1; }
+  .url-input-group .btn { white-space: nowrap; width: auto; }
+
+  .connection-status { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 4px; font-size: 12px; font-weight: 500; letter-spacing: .5px; margin-bottom: 20px; }
+  .connection-status.connected { background: #3D7A4E10; color: var(--green); border: 1px solid #3D7A4E25; }
+  .connection-status.disconnected { background: #B1424210; color: var(--red); border: 1px solid #B1424225; }
+  .status-dot { width: 6px; height: 6px; border-radius: 50%; }
+  .connected .status-dot { background: var(--green); }
+  .disconnected .status-dot { background: var(--red); }
+
+  @media (max-width: 520px) {
+    .header h1 { font-size: 32px; }
+    .day-grid { grid-template-columns: 1fr 1fr; }
+    .app { padding: 16px 12px 80px; }
+    .url-input-group { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="header">
+    <div class="header-badge">2025–2026 Season</div>
+    <h1>Delphic Club<br>Meal Sign-Ups</h1>
+    <div class="header-rule"></div>
+    <p>Sign up for weekly club lunches &amp; dinners. Please only sign up for meals you can attend.</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="signup">Sign Up</button>
+    <button class="tab" data-tab="view">View Signups</button>
+    <button class="tab" data-tab="admin" id="adminTabBtn" style="display:none;">Admin</button>
+  </div>
+
+  <!-- ========== SIGN UP ========== -->
+  <div id="tab-signup" class="section active">
+    <div class="card">
+      <div class="card-title">Your Info</div>
+      <div class="card-sub">Tell us who you are and any dietary needs</div>
+      <div class="field">
+        <label class="field-label">Name <span class="req">*</span></label>
+        <input type="text" id="memberName" placeholder="e.g. Robby Meek">
+      </div>
+      <div class="field">
+        <label class="field-label">Dietary Preference <span class="req">*</span></label>
+        <div class="option-grid">
+          <label class="option-pill"><input type="radio" name="diet" value="No Dietary Restrictions" checked><span class="pill-label">No Restrictions</span></label>
+          <label class="option-pill"><input type="radio" name="diet" value="Vegan"><span class="pill-label">Vegan</span></label>
+          <label class="option-pill"><input type="radio" name="diet" value="Vegetarian"><span class="pill-label">Vegetarian</span></label>
+          <label class="option-pill"><input type="radio" name="diet" value="Gluten-Free"><span class="pill-label">Gluten-Free</span></label>
+          <label class="option-pill"><input type="radio" name="diet" value="No Pork"><span class="pill-label">No Pork</span></label>
+          <label class="option-pill"><input type="radio" name="diet" value="No Beef"><span class="pill-label">No Beef</span></label>
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">Allergies / Special Accommodations</label>
+        <input type="text" id="allergies" placeholder="e.g. peanut, tree nut, shellfish, dairy, no cheese">
+      </div>
+      <div class="field" style="margin-bottom:0;">
+        <label class="option-pill">
+          <input type="checkbox" id="gradGasman">
+          <span class="pill-label" style="font-weight:600;letter-spacing:.5px;">🎓 Grad Gasman</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Select Meals</div>
+      <div class="card-sub">Pick the days you'd like to attend this week</div>
+      <div class="field">
+        <label class="field-label">Week of (Monday)</label>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button class="btn btn-secondary" style="width:auto;padding:10px 14px;font-size:16px;" onclick="shiftWeek('weekSelect',-7,loadWeekData)" title="Previous week">←</button>
+          <input type="date" id="weekSelect" style="flex:1;">
+          <button class="btn btn-secondary" style="width:auto;padding:10px 14px;font-size:16px;" onclick="shiftWeek('weekSelect',7,loadWeekData)" title="Next week">→</button>
+        </div>
+      </div>
+      <div id="loadingDays" style="display:none;text-align:center;padding:24px;color:var(--text-dim);"><div class="spinner"></div> Loading meals…</div>
+      <div id="dayCards" class="day-grid"></div>
+    </div>
+
+    <div id="timeSection" class="card" style="display:none;">
+      <div class="card-title">Meal Details <span style="color:var(--red);font-size:14px;">*</span></div>
+      <div class="card-sub">Select your time, early plate preference, and any accommodations for each day</div>
+      <div id="timeSelectors"></div>
+    </div>
+
+    <div class="card">
+      <div class="field" style="margin-bottom:0;">
+        <label class="field-label">General Notes</label>
+        <textarea id="notes" placeholder="e.g. Bringing a guest, other info that applies to all days"></textarea>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" id="submitBtn" onclick="submitSignup()">Submit Sign-Up</button>
+    <div style="font-size:12px;color:var(--text-dim);margin-top:8px;font-family:'Crimson Pro',serif;font-style:italic;text-align:center;">To update your sign-ups, re-submit with all the days you want for this week.</div>
+  </div>
+
+  <!-- ========== VIEW ========== -->
+  <div id="tab-view" class="section">
+    <div class="field">
+      <label class="field-label">Week of (Monday)</label>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="btn btn-secondary" style="width:auto;padding:10px 14px;font-size:16px;" onclick="shiftWeek('viewWeekSelect',-7,loadViewData)" title="Previous week">←</button>
+        <input type="date" id="viewWeekSelect" style="flex:1;">
+        <button class="btn btn-secondary" style="width:auto;padding:10px 14px;font-size:16px;" onclick="shiftWeek('viewWeekSelect',7,loadViewData)" title="Next week">→</button>
+      </div>
+    </div>
+    <div id="viewLoading" style="display:none;text-align:center;padding:24px;color:var(--text-dim);"><div class="spinner"></div> Loading signups…</div>
+    <div id="viewContent"></div>
+  </div>
+
+  <!-- ========== ADMIN ========== -->
+  <div id="tab-admin" class="section">
+
+    <div id="connectionStatus" class="connection-status disconnected">
+      <div class="status-dot"></div>
+      <span id="statusText">Not connected to Google Sheets</span>
+    </div>
+    <!-- Setup -->
+    <div class="setup-card" id="setupCard">
+      <h2>Connect Google Sheets</h2>
+      <p>Paste your Apps Script deployment URL below to connect.</p>
+      <div class="field">
+        <div class="url-input-group">
+          <input type="text" id="scriptUrl" placeholder="https://script.google.com/macros/s/…/exec">
+          <button class="btn btn-primary" style="width:auto;padding:14px 20px;" onclick="connectSheet()">Connect</button>
+        </div>
+      </div>
+      <div id="setupInstructions" style="margin-top:12px;">
+        <details>
+          <summary style="cursor:pointer;color:var(--accent);font-weight:600;font-size:14px;">📖 Setup Instructions (click to expand)</summary>
+          <div style="margin-top:16px;">
+            <ol>
+              <li>Open <a href="https://sheets.google.com" target="_blank" style="color:var(--accent);">Google Sheets</a> and create a new spreadsheet (or use your existing one)</li>
+              <li>Go to <strong>Extensions → Apps Script</strong></li>
+              <li>Delete any code in the editor, and paste the entire Apps Script code (see the companion <code>apps_script.gs</code> file)</li>
+              <li>Click <strong>Deploy → New deployment</strong></li>
+              <li>Set type to <strong>"Web app"</strong></li>
+              <li>Set <em>Execute as</em>: <strong>Me</strong></li>
+              <li>Set <em>Who has access</em>: <strong>Anyone</strong></li>
+              <li>Click <strong>Deploy</strong> and copy the URL</li>
+              <li>Paste the URL above and click <strong>Connect</strong></li>
+            </ol>
+            <div class="info-banner" style="margin-top:12px;">
+              <strong>Tip:</strong> Each time you edit the Apps Script code, you need to create a <strong>New deployment</strong> (not just save). The URL changes with each deployment version.
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- Capacity -->
+    <div class="card">
+      <div class="card-title">Capacity Settings</div>
+      <div class="card-sub">Maximum signups per time slot</div>
+      <div class="setting-row">
+        <div class="setting-info"><div class="setting-name">Lunch — 12:00 PM</div><div class="setting-desc">Max per slot</div></div>
+        <input type="number" id="cap12" value="50" min="1" onchange="saveCaps()">
+      </div>
+      <div class="setting-row">
+        <div class="setting-info"><div class="setting-name">Lunch — 1:00 PM</div><div class="setting-desc">Max per slot</div></div>
+        <input type="number" id="cap1" value="50" min="1" onchange="saveCaps()">
+      </div>
+      <div class="setting-row">
+        <div class="setting-info"><div class="setting-name">Dinner — 7:30 PM</div><div class="setting-desc">Max per dinner</div></div>
+        <input type="number" id="capDinner" value="50" min="1" onchange="saveCaps()">
+      </div>
+    </div>
+
+    <!-- Week config -->
+    <div class="card">
+      <div class="card-title">Configure Week</div>
+      <div class="card-sub">Set menus, meal types, freeze date, and guest policies</div>
+      <div class="field">
+        <label class="field-label">Week Starting (Monday)</label>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button class="btn btn-secondary" style="width:auto;padding:10px 14px;font-size:16px;" onclick="shiftAdminWeek(-7)" title="Previous week">←</button>
+          <input type="date" id="adminWeekSelect" style="flex:1;">
+          <button class="btn btn-secondary" style="width:auto;padding:10px 14px;font-size:16px;" onclick="shiftAdminWeek(7)" title="Next week">→</button>
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">Freeze Sign-Ups After</label>
+        <input type="datetime-local" id="freezeDate" onchange="if(adminWeekData)adminWeekData.freezeDate=this.value">
+        <div style="font-size:12px;color:var(--text-dim);margin-top:4px;font-family:'Crimson Pro',serif;font-style:italic;">No new sign-ups accepted after this date/time.</div>
+      </div>
+      <div id="adminWeekSetup"></div>
+      <button class="btn btn-secondary" onclick="pushWeekConfig()" style="margin-top:12px;">Save Week Config</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════
+//  CONFIG & STATE
+// ══════════════════════════════════════════════
+let SCRIPT_URL = localStorage.getItem('clubMealScriptUrl') || '';
+let caps = JSON.parse(localStorage.getItem('clubMealCaps') || '{"slot12":50,"slot1":50,"dinner":50}');
+let weekCache = {};  // monday => {config, signups}
+
+const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday'];
+const DEFAULT_MEALS = ['Lunch','Lunch','Lunch','Dinner','Lunch'];
+const CATEGORIES = ['No Dietary Restrictions','Vegan','Vegetarian','Gluten-Free','Allergies','No Pork','No Beef'];
+const DEFAULT_TIMES = { Lunch: ['12:00 PM','1:00 PM'], Dinner: ['7:30 PM'], Brunch: ['12:00 PM'] };
+
+// ══════════════════════════════════════════════
+//  HELPERS
+// ══════════════════════════════════════════════
+function getMonday(dateStr) {
+  const d = new Date(dateStr + 'T12:00:00');
+  const day = d.getDay();
+  d.setDate(d.getDate() - day + (day === 0 ? -6 : 1));
+  return d.toISOString().split('T')[0];
+}
+
+function showToast(msg, color) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.background = color || 'var(--green)';
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+function getCapForSlot(slot) {
+  if (slot === '12:00 PM') return caps.slot12;
+  if (slot === '1:00 PM') return caps.slot1;
+  return caps.dinner;
+}
+
+function saveCaps() {
+  caps.slot12 = parseInt(document.getElementById('cap12').value) || 50;
+  caps.slot1 = parseInt(document.getElementById('cap1').value) || 50;
+  caps.dinner = parseInt(document.getElementById('capDinner').value) || 50;
+  localStorage.setItem('clubMealCaps', JSON.stringify(caps));
+}
+
+function updateConnectionUI() {
+  const el = document.getElementById('connectionStatus');
+  const txt = document.getElementById('statusText');
+  if (SCRIPT_URL) {
+    el.className = 'connection-status connected';
+    txt.textContent = 'Connected to Google Sheets';
+  } else {
+    el.className = 'connection-status disconnected';
+    txt.textContent = 'Not connected — set up in Admin tab';
+  }
+}
+
+// ══════════════════════════════════════════════
+//  GOOGLE SHEETS API (via Apps Script)
+// ══════════════════════════════════════════════
+async function apiCall(action, data = {}) {
+  if (!SCRIPT_URL) { showToast('Connect Google Sheets in Admin tab first', 'var(--red)'); throw new Error('No script URL'); }
+  try {
+    const payload = encodeURIComponent(JSON.stringify({ action, ...data }));
+    const resp = await fetch(SCRIPT_URL + '?payload=' + payload, {
+      method: 'GET',
+      redirect: 'follow'
+    });
+    const text = await resp.text();
+    let result;
+    try { result = JSON.parse(text); } catch(pe) {
+      console.error('Non-JSON response:', text.substring(0, 300));
+      throw new Error('Server returned invalid response');
+    }
+    if (result.error) { showToast('Error: ' + result.error, 'var(--red)'); throw new Error(result.error); }
+    return result;
+  } catch (e) {
+    if (e.message !== 'No script URL') {
+      console.error('API error:', e);
+      showToast('Connection error — see console for details', 'var(--red)');
+    }
+    throw e;
+  }
+}
+
+// ══════════════════════════════════════════════
+//  CONNECTION
+// ══════════════════════════════════════════════
+async function connectSheet() {
+  const url = document.getElementById('scriptUrl').value.trim();
+  if (!url || !url.startsWith('https://script.google.com')) {
+    showToast('Please enter a valid Apps Script URL', 'var(--red)');
+    return;
+  }
+  SCRIPT_URL = url;
+  localStorage.setItem('clubMealScriptUrl', url);
+  try {
+    const result = await apiCall('ping');
+    if (result.status === 'ok') {
+      showToast('Connected to Google Sheets!');
+      updateConnectionUI();
+    }
+  } catch (e) {
+    SCRIPT_URL = '';
+    localStorage.removeItem('clubMealScriptUrl');
+    updateConnectionUI();
+  }
+}
+
+// ══════════════════════════════════════════════
+//  TABS
+// ══════════════════════════════════════════════
+document.querySelectorAll('.tab').forEach(t => {
+  t.addEventListener('click', () => {
+    const id = t.dataset.tab;
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.getElementById('tab-' + id).classList.add('active');
+    if (id === 'view') loadViewData();
+  });
+});
+
+// ══════════════════════════════════════════════
+//  SIGN-UP TAB
+// ══════════════════════════════════════════════
+let currentWeekData = null;
+let selectedDays = new Set();
+let selectedTimes = {};
+let dayOptions = {};  // per-day options: { dayIdx: { early: bool, accommodations: string } }
+
+async function loadWeekData() {
+  const weekInput = document.getElementById('weekSelect').value;
+  if (!weekInput) return;
+  const monday = getMonday(weekInput);
+
+  selectedDays.clear();
+  selectedTimes = {};
+  dayOptions = {};
+  document.getElementById('dayCards').innerHTML = '';
+  document.getElementById('timeSection').style.display = 'none';
+
+  if (!SCRIPT_URL) {
+    // Offline / local-only mode with defaults
+    currentWeekData = buildDefaultWeek(monday);
+    renderDayCards();
+    return;
+  }
+
+  document.getElementById('loadingDays').style.display = 'block';
+  try {
+    const result = await apiCall('getWeek', { monday });
+    currentWeekData = result;
+    weekCache[monday] = result;
+  } catch (e) {
+    currentWeekData = buildDefaultWeek(monday);
+  }
+  document.getElementById('loadingDays').style.display = 'none';
+  renderDayCards();
+}
+
+function buildDefaultWeek(monday) {
+  const md = new Date(monday + 'T12:00:00');
+  return {
+    monday,
+    config: DAYS.map((name, i) => {
+      const d = new Date(md); d.setDate(d.getDate() + i);
+      return { date: d.toISOString().split('T')[0], day: name, meal: DEFAULT_MEALS[i], menu: '', enabled: true };
+    }),
+    signups: {}
+  };
+}
+
+function renderDayCards() {
+  if (!currentWeekData) return;
+  const { config, signups } = currentWeekData;
+
+  let html = '';
+
+  // Check if signups are frozen
+  if (currentWeekData.freezeDate) {
+    const freezeTime = new Date(currentWeekData.freezeDate).getTime();
+    if (Date.now() > freezeTime) {
+      html += `<div style="background:#B1424210;border:1px solid #B1424230;border-radius:4px;padding:14px 18px;font-family:'Crimson Pro',serif;font-size:14px;color:var(--red);margin-bottom:16px;line-height:1.5;">Sign-ups for this week are closed.</div>`;
+    } else {
+      const fd = new Date(currentWeekData.freezeDate);
+      html += `<div style="background:#B07A2A10;border:1px solid #B07A2A25;border-radius:4px;padding:12px 16px;font-family:'Crimson Pro',serif;font-size:13px;color:var(--orange);margin-bottom:16px;font-style:italic;">Sign-ups close ${fd.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})} at ${fd.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})}</div>`;
+    }
+  }
+
+  config.forEach((day, i) => {
+    if (!day.enabled) return;
+    const daySups = signups[i] || [];
+    const times = DEFAULT_TIMES[day.meal] || ['12:00 PM'];
+    const maxTotal = times.reduce((s, t) => s + getCapForSlot(t), 0);
+    const total = daySups.length;
+    const isFull = total >= maxTotal;
+    const pct = total / maxTotal;
+
+    let spotsClass = 'open', spotsText = `${maxTotal - total} spots left`;
+    if (isFull) { spotsClass = 'full-tag'; spotsText = 'FULL'; }
+    else if (pct > 0.8) { spotsClass = 'almost'; spotsText = `${maxTotal - total} spots left`; }
+
+    html += `<div class="day-card ${isFull ? 'full' : ''}" data-day="${i}" onclick="${isFull ? '' : `toggleDay(${i})`}">
+      <div class="day-meal">${day.meal}</div>
+      <div class="day-name">${day.day}</div>
+      <div class="day-date">${new Date(day.date + 'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'})}</div>
+      <div class="day-spots ${spotsClass}">${spotsText}</div>
+    </div>`;
+  });
+  document.getElementById('dayCards').innerHTML = html || '<div class="info-banner">No meals configured for this week.</div>';
+}
+
+function toggleDay(idx) {
+  const card = document.querySelector(`.day-card[data-day="${idx}"]`);
+  if (!card) return;
+  if (selectedDays.has(idx)) { selectedDays.delete(idx); card.classList.remove('selected'); }
+  else { selectedDays.add(idx); card.classList.add('selected'); }
+  updateTimeSection();
+}
+
+function updateTimeSection() {
+  if (!currentWeekData || selectedDays.size === 0) {
+    document.getElementById('timeSection').style.display = 'none'; return;
+  }
+  document.getElementById('timeSection').style.display = 'block';
+  const { config, signups } = currentWeekData;
+
+  let html = '';
+  [...selectedDays].sort().forEach(i => {
+    const day = config[i];
+    const daySups = signups[i] || [];
+    const times = DEFAULT_TIMES[day.meal] || ['12:00 PM'];
+    const guestsAllowed = day.guestsAllowed || false;
+    html += `<div style="margin-bottom:20px;padding:16px;background:var(--surface2);border-radius:4px;border:1px solid var(--border);">
+      <div style="font-family:'Cormorant Garamond',serif;font-weight:600;font-size:18px;color:var(--text-bright);margin-bottom:12px;">${day.day} — ${day.meal}</div>`;
+    if (day.menu) html += `<div class="menu-display"><strong>Menu:</strong> ${day.menu}</div>`;
+
+    if (times.length > 1) {
+      html += `<div style="font-family:'Jost',sans-serif;font-size:11px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);margin-bottom:8px;">Time Slot <span style="color:var(--red);">*</span></div>`;
+    }
+    html += `<div class="time-row" style="margin-bottom:14px;">`;
+    times.forEach(t => {
+      const count = daySups.filter(s => s.time === t).length;
+      const cap = getCapForSlot(t);
+      const full = count >= cap;
+      const label = t === '12:00 PM' ? '12:00\u20131:00 PM' : t === '1:00 PM' ? '1:00\u20132:00 PM' : t;
+      html += `<div class="time-chip ${full ? 'disabled' : ''} ${times.length === 1 ? 'selected' : ''}" data-day="${i}" data-time="${t}" onclick="${full ? '' : `selectTime(this,${i},'${t}')`}">
+        <div class="time-label">${label}</div>
+        <div class="time-spots">${full ? 'FULL' : count + '/' + cap}</div>
+      </div>`;
+    });
+    html += `</div>`;
+
+    if (times.length === 1) { selectedTimes[i] = times[0]; }
+
+    html += `<div style="margin-bottom:10px;">
+      <label class="option-pill">
+        <input type="checkbox" id="early_${i}" onchange="dayOptions[${i}] = dayOptions[${i}] || {}; dayOptions[${i}].early = this.checked;">
+        <span class="pill-label">Early plate</span>
+      </label>
+    </div>`;
+
+    if (guestsAllowed) {
+      html += `<div style="margin-bottom:10px;">
+        <label style="font-family:'Jost',sans-serif;font-size:11px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);">Guests</label>
+        <input type="text" id="guests_${i}" placeholder="e.g. John Smith, Jane Doe" style="margin-top:6px;" oninput="dayOptions[${i}] = dayOptions[${i}] || {}; dayOptions[${i}].guests = this.value;">
+        <div style="font-size:12px;color:var(--text-dim);margin-top:3px;font-family:'Crimson Pro',serif;font-style:italic;">Guests are welcome. List their names above.</div>
+      </div>`;
+    }
+
+    html += `<div>
+      <label style="font-family:'Jost',sans-serif;font-size:11px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);">Accommodations for ${day.day}</label>
+      <input type="text" id="accom_${i}" placeholder="e.g. no cheese, extra rice" style="margin-top:6px;" oninput="dayOptions[${i}] = dayOptions[${i}] || {}; dayOptions[${i}].accommodations = this.value;">
+    </div>`;
+
+    html += `</div>`;
+  });
+  document.getElementById('timeSelectors').innerHTML = html;
+}
+
+function selectTime(el, dayIdx, time) {
+  el.parentElement.querySelectorAll('.time-chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedTimes[dayIdx] = time;
+}
+
+async function submitSignup() {
+  const name = document.getElementById('memberName').value.trim();
+  if (!name) { showToast('Please enter your name', 'var(--red)'); return; }
+  if (!currentWeekData) { showToast('Please select a week', 'var(--red)'); return; }
+  if (selectedDays.size === 0) { showToast('Please select at least one day', 'var(--red)'); return; }
+
+  // Check freeze date
+  if (currentWeekData.freezeDate) {
+    const freezeTime = new Date(currentWeekData.freezeDate).getTime();
+    if (Date.now() > freezeTime) {
+      showToast('Sign-ups are closed for this week', 'var(--red)');
+      return;
+    }
+  }
+
+  const diet = document.querySelector('input[name="diet"]:checked')?.value || 'No Dietary Restrictions';
+  const allergies = document.getElementById('allergies').value.trim();
+  const gradGasman = document.getElementById('gradGasman').checked;
+  const generalNotes = document.getElementById('notes').value.trim();
+  const monday = currentWeekData.monday;
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div> Submitting…';
+
+  const entries = [];
+  for (const dayIdx of selectedDays) {
+    const day = currentWeekData.config[dayIdx];
+    const times = DEFAULT_TIMES[day.meal] || ['12:00 PM'];
+    const time = selectedTimes[dayIdx];
+    // For lunch, time is required (must pick 12 or 1)
+    if (times.length > 1 && !time) {
+      showToast(`Please select a time for ${day.day}`, 'var(--red)');
+      btn.disabled = false;
+      btn.innerHTML = 'Submit Sign-Up';
+      return;
+    }
+    // For dinner, auto-assign the only time slot
+    const finalTime = time || times[0];
+    const opts = dayOptions[dayIdx] || {};
+    const early = opts.early || false;
+    const accom = opts.accommodations || '';
+    const guests = opts.guests || '';
+    // Combine allergies with per-day accommodations
+    const allNotes = [allergies, accom].filter(Boolean).join(', ');
+    const notesCombined = [generalNotes, guests ? 'Guests: ' + guests : ''].filter(Boolean).join('; ');
+    entries.push({ dayIndex: dayIdx, day: day.day, date: day.date, meal: day.meal, time: finalTime, name, diet, allergies: allNotes, early, notes: notesCombined, gradGasman });
+  }
+
+  try {
+    if (SCRIPT_URL) {
+      const result = await apiCall('addSignups', { monday, entries, caps });
+      if (result.added > 0) {
+        if (result.updated > 0) {
+          showToast(`Sign-ups updated! ${result.added} meal${result.added > 1 ? 's' : ''} confirmed.`);
+          showToast('If you changed your days, re-sign-up for every day you want this week.', 'var(--orange)');
+        } else {
+          showToast(`Signed up for ${result.added} meal${result.added > 1 ? 's' : ''}!`);
+        }
+        if (result.full > 0) showToast(`${result.full} slot(s) were full`, 'var(--orange)');
+      } else if (result.full > 0) {
+        showToast('Those slots are full', 'var(--red)');
+      }
+    } else {
+      // Local-only fallback
+      entries.forEach(e => {
+        if (!currentWeekData.signups[e.dayIndex]) currentWeekData.signups[e.dayIndex] = [];
+        currentWeekData.signups[e.dayIndex].push(e);
+      });
+      showToast(`Signed up for ${entries.length} meal${entries.length > 1 ? 's' : ''}! (local only)`);
+    }
+    selectedDays.clear();
+    selectedTimes = {};
+    dayOptions = {};
+    await loadWeekData();
+  } catch (e) {
+    // already toasted
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = 'Submit Sign-Up';
+}
+
+// ══════════════════════════════════════════════
+//  VIEW TAB
+// ══════════════════════════════════════════════
+async function loadViewData() {
+  const weekInput = document.getElementById('viewWeekSelect').value;
+  if (!weekInput) { document.getElementById('viewContent').innerHTML = '<div class="info-banner">Select a week to view signups.</div>'; return; }
+  const monday = getMonday(weekInput);
+
+  document.getElementById('viewLoading').style.display = 'block';
+  document.getElementById('viewContent').innerHTML = '';
+
+  let data;
+  try {
+    if (SCRIPT_URL) {
+      data = await apiCall('getWeek', { monday });
+    } else {
+      data = weekCache[monday] || buildDefaultWeek(monday);
+    }
+  } catch (e) {
+    data = weekCache[monday] || buildDefaultWeek(monday);
+  }
+  document.getElementById('viewLoading').style.display = 'none';
+
+  const { config, signups } = data;
+  let html = '';
+
+  config.forEach((day, i) => {
+    if (!day.enabled) return;
+    const sups = signups[i] || [];
+    const times = DEFAULT_TIMES[day.meal] || ['12:00 PM'];
+    const maxTotal = times.reduce((s, t) => s + getCapForSlot(t), 0);
+
+    html += `<div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:start;">
+        <div>
+          <div class="card-title">${day.day} — ${day.meal}</div>
+          <div class="card-sub">${new Date(day.date + 'T12:00:00').toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})} · ${sups.length}/${maxTotal} signed up</div>
+        </div>
+        <span class="tag ${sups.length >= maxTotal ? 'tag-red' : sups.length > maxTotal * 0.8 ? 'tag-orange' : 'tag-green'}">${sups.length >= maxTotal ? 'FULL' : 'OPEN'}</span>
+      </div>`;
+    if (day.menu) html += `<div class="menu-display"><strong>Menu:</strong> ${day.menu}</div>`;
+
+    if (sups.length === 0) {
+      html += `<div style="color:var(--text-dim);font-size:13px;padding:12px 0;">No signups yet.</div>`;
+    } else {
+      // Group by time slot first, then by diet category within each slot
+      const slots = DEFAULT_TIMES[day.meal] || ['12:00 PM'];
+      slots.forEach(slot => {
+        const slotLabel = slot === '12:00 PM' ? '12:00–1:00 PM' : slot === '1:00 PM' ? '1:00–2:00 PM' : slot;
+        const slotSups = sups.filter(s => {
+          const t = (s.time || '').toString();
+          // Handle the 1899 date bug from Google Sheets
+          if (t.indexOf('1899') !== -1 || t.indexOf('GMT') !== -1) {
+            try {
+              const d = new Date(t);
+              const h = d.getUTCHours !== undefined ? d.getHours() : 12;
+              if (slot === '12:00 PM') return h === 12 || h === 0;
+              if (slot === '1:00 PM') return h === 13 || h === 1;
+              if (slot === '7:30 PM') return h === 19;
+            } catch(e) {}
+          }
+          return t === slot || t.includes(slot);
+        });
+        const slotCap = getCapForSlot(slot);
+
+        html += `<div style="margin-top:16px;padding:12px 16px;background:var(--surface2);border-radius:12px;border-left:3px solid #5B8DEF;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <span style="font-weight:700;font-size:15px;color:#5B8DEF;">${slotLabel}</span>
+            <span style="font-size:12px;color:var(--text-dim);">${slotSups.length}/${slotCap} signed up</span>
+          </div>`;
+
+        if (slotSups.length === 0) {
+          html += `<div style="color:var(--text-dim);font-size:13px;padding:4px 0;">No signups for this time.</div>`;
+        } else {
+          // Group by category within slot
+          const grouped = {};
+          CATEGORIES.forEach(c => grouped[c] = []);
+          slotSups.forEach(s => {
+            const cat = CATEGORIES.includes(s.diet) ? s.diet : 'No Dietary Restrictions';
+            grouped[cat].push(s);
+          });
+          html += `<div class="signup-list">`;
+          CATEGORIES.forEach(cat => {
+            if (grouped[cat].length === 0) return;
+            let catColor = 'var(--text-dim)';
+            if (cat === 'Vegan') catColor = '#4CAF50';
+            if (cat === 'Vegetarian') catColor = '#8BC34A';
+            if (cat === 'Gluten-Free') catColor = '#E89B3E';
+            if (cat === 'No Pork' || cat === 'No Beef') catColor = '#AB47BC';
+            if (cat === 'Allergies') catColor = '#E05555';
+            html += `<div style="font-size:11px;font-weight:600;color:${catColor};text-transform:uppercase;letter-spacing:1px;margin:8px 0 4px;">${cat}</div>`;
+            grouped[cat].forEach(s => {
+              let display = s.name;
+              let tags = [];
+              if (cat !== 'No Dietary Restrictions') tags.push(cat.toLowerCase());
+              if (s.allergies) tags.push(s.allergies);
+              if (s.early) tags.push('early');
+              if (s.gradGasman) tags.push('Grad Gasman');
+              if (tags.length > 0) display += ` (${tags.join(', ')})`;
+              let nameColor = 'var(--text-bright)';
+              if (s.diet === 'Vegan') nameColor = '#3D7A4E';
+              if (s.diet === 'Vegetarian') nameColor = '#5A8A3D';
+              const isGrad = s.gradGasman === true || s.gradGasman === 'true' || s.gradGasman === 'TRUE';
+              const gradStyle = isGrad ? 'background:#8B691412;border-color:#8B691430;' : '';
+              const gradNameStyle = isGrad ? 'font-weight:800;color:#8B6914;' : `color:${nameColor}`;
+              html += `<div class="signup-item" style="${gradStyle}">
+                <div><span class="name" style="${gradNameStyle}">${display}</span><div class="meta">${s.notes ? s.notes : ''}</div></div>
+                <button class="remove-btn" title="Remove" onclick="removeSignup('${monday}',${i},'${s.name.replace(/'/g,"\\'")}','${s.time || ''}')">×</button>
+              </div>`;
+            });
+          });
+          html += `</div>`;
+        }
+        html += `</div>`;
+      });
+    }
+    html += `</div>`;
+  });
+
+  document.getElementById('viewContent').innerHTML = html || '<div class="info-banner">No meals configured for this week.</div>';
+}
+
+async function removeSignup(monday, dayIdx, name, time) {
+  if (!confirm(`Remove ${name} from this day?`)) return;
+  try {
+    if (SCRIPT_URL) {
+      await apiCall('removeSignup', { monday, dayIndex: dayIdx, name, time });
+    }
+    showToast('Removed', 'var(--red)');
+    loadViewData();
+  } catch (e) {}
+}
+
+// ══════════════════════════════════════════════
+//  ADMIN — Week Config
+// ══════════════════════════════════════════════
+let adminWeekData = null;
+
+function shiftWeek(inputId, days, callback) {
+  const el = document.getElementById(inputId);
+  const current = el.value;
+  if (!current) return;
+  const d = new Date(current + 'T12:00:00');
+  d.setDate(d.getDate() + days);
+  // Snap to Monday
+  const day = d.getDay();
+  if (day === 0) d.setDate(d.getDate() - 6);
+  else if (day !== 1) d.setDate(d.getDate() - (day - 1));
+
+  // Limit: 2 weeks back, 2 weeks forward from current Monday
+  const now = new Date(); now.setHours(12,0,0,0);
+  const nowDay = now.getDay();
+  const currMon = new Date(now);
+  if (nowDay === 0) currMon.setDate(currMon.getDate() - 6);
+  else currMon.setDate(currMon.getDate() - (nowDay - 1));
+
+  const minDate = new Date(currMon); minDate.setDate(minDate.getDate() - 14);
+  const maxDate = new Date(currMon); maxDate.setDate(maxDate.getDate() + 14);
+
+  if (d < minDate || d > maxDate) return; // out of range, do nothing
+
+  el.value = d.toISOString().split('T')[0];
+  if (callback) callback();
+}
+
+function shiftAdminWeek(days) {
+  shiftWeek('adminWeekSelect', days, renderAdminWeek);
+}
+
+async function renderAdminWeek() {
+  const weekInput = document.getElementById('adminWeekSelect').value;
+  if (!weekInput) { document.getElementById('adminWeekSetup').innerHTML = '<div class="info-banner">Select a week.</div>'; return; }
+  const monday = getMonday(weekInput);
+
+  try {
+    if (SCRIPT_URL) {
+      adminWeekData = await apiCall('getWeek', { monday });
+    } else {
+      adminWeekData = buildDefaultWeek(monday);
+    }
+  } catch (e) {
+    adminWeekData = buildDefaultWeek(monday);
+  }
+
+  // Load freeze date if saved
+  if (adminWeekData.freezeDate) {
+    document.getElementById('freezeDate').value = adminWeekData.freezeDate;
+  } else {
+    document.getElementById('freezeDate').value = '';
+  }
+
+  const { config } = adminWeekData;
+  let html = '';
+  config.forEach((day, i) => {
+    const guestsAllowed = day.guestsAllowed || false;
+    html += `<div style="border:1px solid var(--border);border-radius:6px;padding:16px;margin-bottom:10px;background:var(--surface2);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <strong style="font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--text-bright);">${day.day} (${new Date(day.date + 'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'})})</strong>
+        <label class="option-pill" style="margin:0;">
+          <input type="checkbox" ${day.enabled !== false ? 'checked' : ''} onchange="adminWeekData.config[${i}].enabled=this.checked">
+          <span class="pill-label" style="font-size:12px;">Enabled</span>
+        </label>
+      </div>
+      <div class="field" style="margin-bottom:12px;">
+        <label class="field-label" style="font-size:10px;">Meal Type</label>
+        <select onchange="adminWeekData.config[${i}].meal=this.value">
+          <option ${day.meal==='Lunch'?'selected':''}>Lunch</option>
+          <option ${day.meal==='Dinner'?'selected':''}>Dinner</option>
+          <option ${day.meal==='Brunch'?'selected':''}>Brunch</option>
+        </select>
+      </div>
+      <div class="field" style="margin-bottom:12px;">
+        <label class="field-label" style="font-size:10px;">Menu Description</label>
+        <textarea style="min-height:56px;" onchange="adminWeekData.config[${i}].menu=this.value">${day.menu || ''}</textarea>
+      </div>
+      <div style="margin-bottom:0;">
+        <label class="option-pill">
+          <input type="checkbox" ${guestsAllowed ? 'checked' : ''} onchange="adminWeekData.config[${i}].guestsAllowed=this.checked">
+          <span class="pill-label" style="font-size:12px;">Guests Allowed</span>
+        </label>
+      </div>
+    </div>`;
+  });
+  document.getElementById('adminWeekSetup').innerHTML = html;
+}
+
+async function pushWeekConfig() {
+  if (!adminWeekData) { showToast('Select a week first', 'var(--red)'); return; }
+  if (!SCRIPT_URL) { showToast('Connect Google Sheets first', 'var(--red)'); return; }
+  try {
+    await apiCall('setWeekConfig', { monday: adminWeekData.monday, config: adminWeekData.config, caps, freezeDate: adminWeekData.freezeDate || '' });
+    showToast('Week config saved!');
+    // Clear cache so Sign Up and View tabs reload fresh data
+    delete weekCache[adminWeekData.monday];
+    currentWeekData = null;
+    // If the sign-up tab week matches, reload it
+    const signupWeek = document.getElementById('weekSelect').value;
+    if (signupWeek && getMonday(signupWeek) === adminWeekData.monday) {
+      loadWeekData();
+    }
+    // Re-render admin to confirm saved state
+    renderAdminWeek();
+  } catch (e) {}
+}
+
+// ══════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════
+document.getElementById('cap12').value = caps.slot12;
+document.getElementById('cap1').value = caps.slot1;
+document.getElementById('capDinner').value = caps.dinner;
+document.getElementById('scriptUrl').value = SCRIPT_URL;
+
+// Helper: get the Monday of the current week
+function getCurrentMonday() {
+  const d = new Date();
+  d.setHours(12,0,0,0); // avoid timezone issues
+  const day = d.getDay(); // 0=Sun, 1=Mon, ...6=Sat
+  if (day === 0) d.setDate(d.getDate() - 6);      // Sun → prev Mon
+  else d.setDate(d.getDate() - (day - 1));          // Tue-Sat → back to Mon
+  return d.toISOString().split('T')[0];
+}
+
+// Helper: get next Monday from today
+function getNextMonday() {
+  const d = new Date();
+  d.setHours(12,0,0,0);
+  const day = d.getDay(); // 0=Sun, 1=Mon, ...6=Sat
+  if (day === 0) d.setDate(d.getDate() + 1);       // Sun → tomorrow (Mon)
+  else if (day === 1) d.setDate(d.getDate() + 7);   // Mon → next Mon
+  else d.setDate(d.getDate() + (8 - day));           // Tue-Sat → next Mon
+  return d.toISOString().split('T')[0];
+}
+
+// Determine which week to show for sign-ups and viewing
+// Mon-Fri: sign up = next week, view = this week
+// Sat-Sun: both show next week (current week meals are over)
+function getSignupMonday() {
+  const d = new Date();
+  const day = d.getDay();
+  if (day === 0 || day === 6) {
+    // Weekend: show next week for both
+    return getNextMonday();
+  }
+  // Weekday: sign up for next week
+  return getNextMonday();
+}
+
+function getViewMonday() {
+  const d = new Date();
+  const day = d.getDay();
+  if (day === 0 || day === 6) {
+    // Weekend: current week is over, show next week
+    return getNextMonday();
+  }
+  // Weekday: show current week
+  return getCurrentMonday();
+}
+
+// Snap date inputs to Monday when changed
+function snapToMonday(inputId, callback) {
+  const el = document.getElementById(inputId);
+  el.addEventListener('change', () => {
+    const val = el.value;
+    if (val) {
+      const monday = getMonday(val);
+      if (el.value !== monday) el.value = monday;
+    }
+    if (callback) callback();
+  });
+}
+
+// Admin mode: show admin tab only if ?admin is in URL and correct password
+const isAdmin = (() => {
+  if (!new URLSearchParams(window.location.search).has('admin')) return false;
+  const stored = sessionStorage.getItem('delphic_admin');
+  if (stored === 'true') return true;
+  const pw = prompt('Enter admin password:');
+  if (pw === '9LindenStreet') {
+    sessionStorage.setItem('delphic_admin', 'true');
+    return true;
+  }
+  return false;
+})();
+if (isAdmin) {
+  document.getElementById('adminTabBtn').style.display = '';
+}
+
+// Set defaults
+const signupMon = getSignupMonday();
+const viewMon = getViewMonday();
+const adminMon = getCurrentMonday();
+document.getElementById('weekSelect').value = signupMon;
+document.getElementById('viewWeekSelect').value = viewMon;
+document.getElementById('adminWeekSelect').value = adminMon;
+
+// Snap all date inputs to Mondays
+snapToMonday('weekSelect', loadWeekData);
+snapToMonday('viewWeekSelect', loadViewData);
+snapToMonday('adminWeekSelect', renderAdminWeek);
+
+updateConnectionUI();
+loadWeekData();
+// Auto-load admin week config if in admin mode
+if (isAdmin && SCRIPT_URL) { renderAdminWeek(); }
+</script>
+</body>
+</html>
