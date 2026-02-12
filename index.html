@@ -138,15 +138,6 @@
   .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(0,0,0,.15); border-top-color: var(--accent); border-radius: 50%; animation: spin .6s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  .setup-card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 28px 24px; margin-bottom: 24px; }
-  .setup-card h2 { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 600; color: var(--text-bright); margin-bottom: 8px; }
-  .setup-card p { font-family: 'Crimson Pro', serif; color: var(--text-dim); font-size: 14px; line-height: 1.6; margin-bottom: 16px; font-style: italic; }
-  .setup-card code { background: var(--surface2); padding: 2px 8px; border-radius: 2px; font-size: 13px; color: var(--accent); }
-  .setup-card ol { padding-left: 20px; color: var(--text-dim); font-family: 'Crimson Pro', serif; font-size: 14px; line-height: 2; }
-  .url-input-group { display: flex; gap: 8px; }
-  .url-input-group input { flex: 1; }
-  .url-input-group .btn { white-space: nowrap; width: auto; }
-
   .connection-status { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 4px; font-size: 12px; font-weight: 500; letter-spacing: .5px; margin-bottom: 20px; }
   .connection-status.connected { background: #3D7A4E10; color: var(--green); border: 1px solid #3D7A4E25; }
   .connection-status.disconnected { background: #B1424210; color: var(--red); border: 1px solid #B1424225; }
@@ -158,7 +149,6 @@
     .header h1 { font-size: 32px; }
     .day-grid { grid-template-columns: 1fr 1fr; }
     .app { padding: 16px 12px 80px; }
-    .url-input-group { flex-direction: column; }
   }
 </style>
 </head>
@@ -216,12 +206,12 @@
       <div class="field">
         <label class="field-label">Week of (Monday)</label>
         <div style="display:flex;gap:8px;align-items:center;">
-          <button class="btn btn-secondary" style="width:auto;padding:10px 14px;font-size:16px;" onclick="shiftWeek('weekSelect',-7,loadWeekData)" title="Previous week">←</button>
+          <button class="btn btn-secondary" style="width:auto;padding:10px 14px;font-size:16px;" onclick="shiftWeek('weekSelect',-7,loadWeekData)" title="Previous week">&#8592;</button>
           <input type="date" id="weekSelect" style="flex:1;">
-          <button class="btn btn-secondary" style="width:auto;padding:10px 14px;font-size:16px;" onclick="shiftWeek('weekSelect',7,loadWeekData)" title="Next week">→</button>
+          <button class="btn btn-secondary" style="width:auto;padding:10px 14px;font-size:16px;" onclick="shiftWeek('weekSelect',7,loadWeekData)" title="Next week">&#8594;</button>
         </div>
       </div>
-      <div id="loadingDays" style="display:none;text-align:center;padding:24px;color:var(--text-dim);"><div class="spinner"></div> Loading meals…</div>
+      <div id="loadingDays" style="display:none;text-align:center;padding:24px;color:var(--text-dim);"><div class="spinner"></div> Loading meals...</div>
       <div id="dayCards" class="day-grid"></div>
     </div>
 
@@ -247,53 +237,21 @@
     <div class="field">
       <label class="field-label">Week of (Monday)</label>
       <div style="display:flex;gap:8px;align-items:center;">
-        <button class="btn btn-secondary" style="width:auto;padding:10px 14px;font-size:16px;" onclick="shiftWeek('viewWeekSelect',-7,loadViewData)" title="Previous week">←</button>
+        <button class="btn btn-secondary" style="width:auto;padding:10px 14px;font-size:16px;" onclick="shiftWeek('viewWeekSelect',-7,loadViewData)" title="Previous week">&#8592;</button>
         <input type="date" id="viewWeekSelect" style="flex:1;">
-        <button class="btn btn-secondary" style="width:auto;padding:10px 14px;font-size:16px;" onclick="shiftWeek('viewWeekSelect',7,loadViewData)" title="Next week">→</button>
+        <button class="btn btn-secondary" style="width:auto;padding:10px 14px;font-size:16px;" onclick="shiftWeek('viewWeekSelect',7,loadViewData)" title="Next week">&#8594;</button>
       </div>
     </div>
-    <div id="viewLoading" style="display:none;text-align:center;padding:24px;color:var(--text-dim);"><div class="spinner"></div> Loading signups…</div>
+    <div id="viewLoading" style="display:none;text-align:center;padding:24px;color:var(--text-dim);"><div class="spinner"></div> Loading signups...</div>
     <div id="viewContent"></div>
   </div>
 
   <!-- ========== ADMIN ========== -->
   <div id="tab-admin" class="section">
 
-    <div id="connectionStatus" class="connection-status disconnected">
+    <div id="connectionStatus" class="connection-status connected">
       <div class="status-dot"></div>
-      <span id="statusText">Not connected to Google Sheets</span>
-    </div>
-    <!-- Setup -->
-    <div class="setup-card" id="setupCard">
-      <h2>Connect Google Sheets</h2>
-      <p>Paste your Apps Script deployment URL below to connect.</p>
-      <div class="field">
-        <div class="url-input-group">
-          <input type="text" id="scriptUrl" placeholder="https://script.google.com/macros/s/…/exec">
-          <button class="btn btn-primary" style="width:auto;padding:14px 20px;" onclick="connectSheet()">Connect</button>
-        </div>
-      </div>
-      <div id="setupInstructions" style="margin-top:12px;">
-        <details>
-          <summary style="cursor:pointer;color:var(--accent);font-weight:600;font-size:14px;">📖 Setup Instructions (click to expand)</summary>
-          <div style="margin-top:16px;">
-            <ol>
-              <li>Open <a href="https://sheets.google.com" target="_blank" style="color:var(--accent);">Google Sheets</a> and create a new spreadsheet (or use your existing one)</li>
-              <li>Go to <strong>Extensions → Apps Script</strong></li>
-              <li>Delete any code in the editor, and paste the entire Apps Script code (see the companion <code>apps_script.gs</code> file)</li>
-              <li>Click <strong>Deploy → New deployment</strong></li>
-              <li>Set type to <strong>"Web app"</strong></li>
-              <li>Set <em>Execute as</em>: <strong>Me</strong></li>
-              <li>Set <em>Who has access</em>: <strong>Anyone</strong></li>
-              <li>Click <strong>Deploy</strong> and copy the URL</li>
-              <li>Paste the URL above and click <strong>Connect</strong></li>
-            </ol>
-            <div class="info-banner" style="margin-top:12px;">
-              <strong>Tip:</strong> Each time you edit the Apps Script code, you need to create a <strong>New deployment</strong> (not just save). The URL changes with each deployment version.
-            </div>
-          </div>
-        </details>
-      </div>
+      <span id="statusText">Connected to Google Sheets</span>
     </div>
 
     <!-- Capacity -->
@@ -301,15 +259,15 @@
       <div class="card-title">Capacity Settings</div>
       <div class="card-sub">Maximum signups per time slot</div>
       <div class="setting-row">
-        <div class="setting-info"><div class="setting-name">Lunch — 12:00 PM</div><div class="setting-desc">Max per slot</div></div>
+        <div class="setting-info"><div class="setting-name">Lunch -- 12:00 PM</div><div class="setting-desc">Max per slot</div></div>
         <input type="number" id="cap12" value="50" min="1" onchange="saveCaps()">
       </div>
       <div class="setting-row">
-        <div class="setting-info"><div class="setting-name">Lunch — 1:00 PM</div><div class="setting-desc">Max per slot</div></div>
+        <div class="setting-info"><div class="setting-name">Lunch -- 1:00 PM</div><div class="setting-desc">Max per slot</div></div>
         <input type="number" id="cap1" value="50" min="1" onchange="saveCaps()">
       </div>
       <div class="setting-row">
-        <div class="setting-info"><div class="setting-name">Dinner — 7:30 PM</div><div class="setting-desc">Max per dinner</div></div>
+        <div class="setting-info"><div class="setting-name">Dinner -- 7:30 PM</div><div class="setting-desc">Max per dinner</div></div>
         <input type="number" id="capDinner" value="50" min="1" onchange="saveCaps()">
       </div>
     </div>
@@ -321,9 +279,9 @@
       <div class="field">
         <label class="field-label">Week Starting (Monday)</label>
         <div style="display:flex;gap:8px;align-items:center;">
-          <button class="btn btn-secondary" style="width:auto;padding:10px 14px;font-size:16px;" onclick="shiftAdminWeek(-7)" title="Previous week">←</button>
+          <button class="btn btn-secondary" style="width:auto;padding:10px 14px;font-size:16px;" onclick="shiftAdminWeek(-7)" title="Previous week">&#8592;</button>
           <input type="date" id="adminWeekSelect" style="flex:1;">
-          <button class="btn btn-secondary" style="width:auto;padding:10px 14px;font-size:16px;" onclick="shiftAdminWeek(7)" title="Next week">→</button>
+          <button class="btn btn-secondary" style="width:auto;padding:10px 14px;font-size:16px;" onclick="shiftAdminWeek(7)" title="Next week">&#8594;</button>
         </div>
       </div>
       <div class="field">
@@ -340,11 +298,16 @@
 <div class="toast" id="toast"></div>
 
 <script>
-// ══════════════════════════════════════════════
-//  CONFIG & STATE
-// ══════════════════════════════════════════════
-let SCRIPT_URL = localStorage.getItem('clubMealScriptUrl') || '';
-let caps = JSON.parse(localStorage.getItem('clubMealCaps') || '{"slot12":50,"slot1":50,"dinner":50}');
+// =============================================
+//  HARDCODED APPS SCRIPT URL
+//  This is the single source of truth.
+//  Every visitor (any browser, incognito, any device) uses this same URL.
+//  To change it, update this line and re-upload to GitHub.
+// =============================================
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyw6m1G7b9GQXmqGKkCtVnZ_-wkuTsCfb5M-GAbIogLbWaS09nzX645e1NmNC0oJ63GbQ/exec';
+
+// Capacity defaults (will be overridden by sheet config when available)
+let caps = { slot12: 50, slot1: 50, dinner: 50 };
 let weekCache = {};  // monday => {config, signups}
 
 const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday'];
@@ -352,9 +315,9 @@ const DEFAULT_MEALS = ['Lunch','Lunch','Lunch','Dinner','Lunch'];
 const CATEGORIES = ['No Dietary Restrictions','Vegan','Vegetarian','Gluten-Free','Allergies','No Pork','No Beef'];
 const DEFAULT_TIMES = { Lunch: ['12:00 PM','1:00 PM'], Dinner: ['7:30 PM'], Brunch: ['12:00 PM'] };
 
-// ══════════════════════════════════════════════
+// =============================================
 //  HELPERS
-// ══════════════════════════════════════════════
+// =============================================
 function getMonday(dateStr) {
   const d = new Date(dateStr + 'T12:00:00');
   const day = d.getDay();
@@ -380,26 +343,12 @@ function saveCaps() {
   caps.slot12 = parseInt(document.getElementById('cap12').value) || 50;
   caps.slot1 = parseInt(document.getElementById('cap1').value) || 50;
   caps.dinner = parseInt(document.getElementById('capDinner').value) || 50;
-  localStorage.setItem('clubMealCaps', JSON.stringify(caps));
 }
 
-function updateConnectionUI() {
-  const el = document.getElementById('connectionStatus');
-  const txt = document.getElementById('statusText');
-  if (SCRIPT_URL) {
-    el.className = 'connection-status connected';
-    txt.textContent = 'Connected to Google Sheets';
-  } else {
-    el.className = 'connection-status disconnected';
-    txt.textContent = 'Not connected — set up in Admin tab';
-  }
-}
-
-// ══════════════════════════════════════════════
+// =============================================
 //  GOOGLE SHEETS API (via Apps Script)
-// ══════════════════════════════════════════════
+// =============================================
 async function apiCall(action, data = {}) {
-  if (!SCRIPT_URL) { showToast('Connect Google Sheets in Admin tab first', 'var(--red)'); throw new Error('No script URL'); }
   try {
     const payload = encodeURIComponent(JSON.stringify({ action, ...data }));
     const resp = await fetch(SCRIPT_URL + '?payload=' + payload, {
@@ -415,41 +364,15 @@ async function apiCall(action, data = {}) {
     if (result.error) { showToast('Error: ' + result.error, 'var(--red)'); throw new Error(result.error); }
     return result;
   } catch (e) {
-    if (e.message !== 'No script URL') {
-      console.error('API error:', e);
-      showToast('Connection error — see console for details', 'var(--red)');
-    }
+    console.error('API error:', e);
+    showToast('Connection error — try refreshing the page', 'var(--red)');
     throw e;
   }
 }
 
-// ══════════════════════════════════════════════
-//  CONNECTION
-// ══════════════════════════════════════════════
-async function connectSheet() {
-  const url = document.getElementById('scriptUrl').value.trim();
-  if (!url || !url.startsWith('https://script.google.com')) {
-    showToast('Please enter a valid Apps Script URL', 'var(--red)');
-    return;
-  }
-  SCRIPT_URL = url;
-  localStorage.setItem('clubMealScriptUrl', url);
-  try {
-    const result = await apiCall('ping');
-    if (result.status === 'ok') {
-      showToast('Connected to Google Sheets!');
-      updateConnectionUI();
-    }
-  } catch (e) {
-    SCRIPT_URL = '';
-    localStorage.removeItem('clubMealScriptUrl');
-    updateConnectionUI();
-  }
-}
-
-// ══════════════════════════════════════════════
+// =============================================
 //  TABS
-// ══════════════════════════════════════════════
+// =============================================
 document.querySelectorAll('.tab').forEach(t => {
   t.addEventListener('click', () => {
     const id = t.dataset.tab;
@@ -461,13 +384,13 @@ document.querySelectorAll('.tab').forEach(t => {
   });
 });
 
-// ══════════════════════════════════════════════
+// =============================================
 //  SIGN-UP TAB
-// ══════════════════════════════════════════════
+// =============================================
 let currentWeekData = null;
 let selectedDays = new Set();
 let selectedTimes = {};
-let dayOptions = {};  // per-day options: { dayIdx: { early: bool, accommodations: string } }
+let dayOptions = {};
 
 async function loadWeekData() {
   const weekInput = document.getElementById('weekSelect').value;
@@ -480,18 +403,17 @@ async function loadWeekData() {
   document.getElementById('dayCards').innerHTML = '';
   document.getElementById('timeSection').style.display = 'none';
 
-  if (!SCRIPT_URL) {
-    // Offline / local-only mode with defaults
-    currentWeekData = buildDefaultWeek(monday);
-    renderDayCards();
-    return;
-  }
-
   document.getElementById('loadingDays').style.display = 'block';
   try {
     const result = await apiCall('getWeek', { monday });
     currentWeekData = result;
     weekCache[monday] = result;
+    // Load caps from sheet config if available
+    if (result.caps) {
+      caps.slot12 = result.caps.slot12 || 50;
+      caps.slot1 = result.caps.slot1 || 50;
+      caps.dinner = result.caps.dinner || 50;
+    }
   } catch (e) {
     currentWeekData = buildDefaultWeek(monday);
   }
@@ -517,14 +439,13 @@ function renderDayCards() {
 
   let html = '';
 
-  // Check if signups are frozen
   if (currentWeekData.freezeDate) {
     const freezeTime = new Date(currentWeekData.freezeDate).getTime();
     if (Date.now() > freezeTime) {
-      html += `<div style="background:#B1424210;border:1px solid #B1424230;border-radius:4px;padding:14px 18px;font-family:'Crimson Pro',serif;font-size:14px;color:var(--red);margin-bottom:16px;line-height:1.5;">Sign-ups for this week are closed.</div>`;
+      html += '<div style="background:#B1424210;border:1px solid #B1424230;border-radius:4px;padding:14px 18px;font-family:\'Crimson Pro\',serif;font-size:14px;color:var(--red);margin-bottom:16px;line-height:1.5;">Sign-ups for this week are closed.</div>';
     } else {
       const fd = new Date(currentWeekData.freezeDate);
-      html += `<div style="background:#B07A2A10;border:1px solid #B07A2A25;border-radius:4px;padding:12px 16px;font-family:'Crimson Pro',serif;font-size:13px;color:var(--orange);margin-bottom:16px;font-style:italic;">Sign-ups close ${fd.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})} at ${fd.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})}</div>`;
+      html += '<div style="background:#B07A2A10;border:1px solid #B07A2A25;border-radius:4px;padding:12px 16px;font-family:\'Crimson Pro\',serif;font-size:13px;color:var(--orange);margin-bottom:16px;font-style:italic;">Sign-ups close ' + fd.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'}) + ' at ' + fd.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}) + '</div>';
     }
   }
 
@@ -537,22 +458,22 @@ function renderDayCards() {
     const isFull = total >= maxTotal;
     const pct = total / maxTotal;
 
-    let spotsClass = 'open', spotsText = `${maxTotal - total} spots left`;
+    let spotsClass = 'open', spotsText = (maxTotal - total) + ' spots left';
     if (isFull) { spotsClass = 'full-tag'; spotsText = 'FULL'; }
-    else if (pct > 0.8) { spotsClass = 'almost'; spotsText = `${maxTotal - total} spots left`; }
+    else if (pct > 0.8) { spotsClass = 'almost'; spotsText = (maxTotal - total) + ' spots left'; }
 
-    html += `<div class="day-card ${isFull ? 'full' : ''}" data-day="${i}" onclick="${isFull ? '' : `toggleDay(${i})`}">
-      <div class="day-meal">${day.meal}</div>
-      <div class="day-name">${day.day}</div>
-      <div class="day-date">${new Date(day.date + 'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'})}</div>
-      <div class="day-spots ${spotsClass}">${spotsText}</div>
-    </div>`;
+    html += '<div class="day-card ' + (isFull ? 'full' : '') + '" data-day="' + i + '" onclick="' + (isFull ? '' : 'toggleDay(' + i + ')') + '">' +
+      '<div class="day-meal">' + day.meal + '</div>' +
+      '<div class="day-name">' + day.day + '</div>' +
+      '<div class="day-date">' + new Date(day.date + 'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}) + '</div>' +
+      '<div class="day-spots ' + spotsClass + '">' + spotsText + '</div>' +
+    '</div>';
   });
   document.getElementById('dayCards').innerHTML = html || '<div class="info-banner">No meals configured for this week.</div>';
 }
 
 function toggleDay(idx) {
-  const card = document.querySelector(`.day-card[data-day="${idx}"]`);
+  const card = document.querySelector('.day-card[data-day="' + idx + '"]');
   if (!card) return;
   if (selectedDays.has(idx)) { selectedDays.delete(idx); card.classList.remove('selected'); }
   else { selectedDays.add(idx); card.classList.add('selected'); }
@@ -572,49 +493,49 @@ function updateTimeSection() {
     const daySups = signups[i] || [];
     const times = DEFAULT_TIMES[day.meal] || ['12:00 PM'];
     const guestsAllowed = day.guestsAllowed || false;
-    html += `<div style="margin-bottom:20px;padding:16px;background:var(--surface2);border-radius:4px;border:1px solid var(--border);">
-      <div style="font-family:'Cormorant Garamond',serif;font-weight:600;font-size:18px;color:var(--text-bright);margin-bottom:12px;">${day.day} — ${day.meal}</div>`;
-    if (day.menu) html += `<div class="menu-display"><strong>Menu:</strong> ${day.menu}</div>`;
+    html += '<div style="margin-bottom:20px;padding:16px;background:var(--surface2);border-radius:4px;border:1px solid var(--border);">' +
+      '<div style="font-family:\'Cormorant Garamond\',serif;font-weight:600;font-size:18px;color:var(--text-bright);margin-bottom:12px;">' + day.day + ' — ' + day.meal + '</div>';
+    if (day.menu) html += '<div class="menu-display"><strong>Menu:</strong> ' + day.menu + '</div>';
 
     if (times.length > 1) {
-      html += `<div style="font-family:'Jost',sans-serif;font-size:11px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);margin-bottom:8px;">Time Slot <span style="color:var(--red);">*</span></div>`;
+      html += '<div style="font-family:\'Jost\',sans-serif;font-size:11px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);margin-bottom:8px;">Time Slot <span style="color:var(--red);">*</span></div>';
     }
-    html += `<div class="time-row" style="margin-bottom:14px;">`;
+    html += '<div class="time-row" style="margin-bottom:14px;">';
     times.forEach(t => {
       const count = daySups.filter(s => s.time === t).length;
       const cap = getCapForSlot(t);
       const full = count >= cap;
       const label = t === '12:00 PM' ? '12:00\u20131:00 PM' : t === '1:00 PM' ? '1:00\u20132:00 PM' : t;
-      html += `<div class="time-chip ${full ? 'disabled' : ''} ${times.length === 1 ? 'selected' : ''}" data-day="${i}" data-time="${t}" onclick="${full ? '' : `selectTime(this,${i},'${t}')`}">
-        <div class="time-label">${label}</div>
-        <div class="time-spots">${full ? 'FULL' : count + '/' + cap}</div>
-      </div>`;
+      html += '<div class="time-chip ' + (full ? 'disabled' : '') + ' ' + (times.length === 1 ? 'selected' : '') + '" data-day="' + i + '" data-time="' + t + '" onclick="' + (full ? '' : "selectTime(this," + i + ",'" + t + "')") + '">' +
+        '<div class="time-label">' + label + '</div>' +
+        '<div class="time-spots">' + (full ? 'FULL' : count + '/' + cap) + '</div>' +
+      '</div>';
     });
-    html += `</div>`;
+    html += '</div>';
 
     if (times.length === 1) { selectedTimes[i] = times[0]; }
 
-    html += `<div style="margin-bottom:10px;">
-      <label class="option-pill">
-        <input type="checkbox" id="early_${i}" onchange="dayOptions[${i}] = dayOptions[${i}] || {}; dayOptions[${i}].early = this.checked;">
-        <span class="pill-label">Early plate</span>
-      </label>
-    </div>`;
+    html += '<div style="margin-bottom:10px;">' +
+      '<label class="option-pill">' +
+        '<input type="checkbox" id="early_' + i + '" onchange="dayOptions[' + i + '] = dayOptions[' + i + '] || {}; dayOptions[' + i + '].early = this.checked;">' +
+        '<span class="pill-label">Early plate</span>' +
+      '</label>' +
+    '</div>';
 
     if (guestsAllowed) {
-      html += `<div style="margin-bottom:10px;">
-        <label style="font-family:'Jost',sans-serif;font-size:11px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);">Guests</label>
-        <input type="text" id="guests_${i}" placeholder="e.g. John Smith, Jane Doe" style="margin-top:6px;" oninput="dayOptions[${i}] = dayOptions[${i}] || {}; dayOptions[${i}].guests = this.value;">
-        <div style="font-size:12px;color:var(--text-dim);margin-top:3px;font-family:'Crimson Pro',serif;font-style:italic;">Guests are welcome. List their names above.</div>
-      </div>`;
+      html += '<div style="margin-bottom:10px;">' +
+        '<label style="font-family:\'Jost\',sans-serif;font-size:11px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);">Guests</label>' +
+        '<input type="text" id="guests_' + i + '" placeholder="e.g. John Smith, Jane Doe" style="margin-top:6px;" oninput="dayOptions[' + i + '] = dayOptions[' + i + '] || {}; dayOptions[' + i + '].guests = this.value;">' +
+        '<div style="font-size:12px;color:var(--text-dim);margin-top:3px;font-family:\'Crimson Pro\',serif;font-style:italic;">Guests are welcome. List their names above.</div>' +
+      '</div>';
     }
 
-    html += `<div>
-      <label style="font-family:'Jost',sans-serif;font-size:11px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);">Accommodations for ${day.day}</label>
-      <input type="text" id="accom_${i}" placeholder="e.g. no cheese, extra rice" style="margin-top:6px;" oninput="dayOptions[${i}] = dayOptions[${i}] || {}; dayOptions[${i}].accommodations = this.value;">
-    </div>`;
+    html += '<div>' +
+      '<label style="font-family:\'Jost\',sans-serif;font-size:11px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);">Accommodations for ' + day.day + '</label>' +
+      '<input type="text" id="accom_' + i + '" placeholder="e.g. no cheese, extra rice" style="margin-top:6px;" oninput="dayOptions[' + i + '] = dayOptions[' + i + '] || {}; dayOptions[' + i + '].accommodations = this.value;">' +
+    '</div>';
 
-    html += `</div>`;
+    html += '</div>';
   });
   document.getElementById('timeSelectors').innerHTML = html;
 }
@@ -631,7 +552,6 @@ async function submitSignup() {
   if (!currentWeekData) { showToast('Please select a week', 'var(--red)'); return; }
   if (selectedDays.size === 0) { showToast('Please select at least one day', 'var(--red)'); return; }
 
-  // Check freeze date
   if (currentWeekData.freezeDate) {
     const freezeTime = new Date(currentWeekData.freezeDate).getTime();
     if (Date.now() > freezeTime) {
@@ -648,53 +568,40 @@ async function submitSignup() {
 
   const btn = document.getElementById('submitBtn');
   btn.disabled = true;
-  btn.innerHTML = '<div class="spinner"></div> Submitting…';
+  btn.innerHTML = '<div class="spinner"></div> Submitting...';
 
   const entries = [];
   for (const dayIdx of selectedDays) {
     const day = currentWeekData.config[dayIdx];
     const times = DEFAULT_TIMES[day.meal] || ['12:00 PM'];
     const time = selectedTimes[dayIdx];
-    // For lunch, time is required (must pick 12 or 1)
     if (times.length > 1 && !time) {
-      showToast(`Please select a time for ${day.day}`, 'var(--red)');
+      showToast('Please select a time for ' + day.day, 'var(--red)');
       btn.disabled = false;
       btn.innerHTML = 'Submit Sign-Up';
       return;
     }
-    // For dinner, auto-assign the only time slot
     const finalTime = time || times[0];
     const opts = dayOptions[dayIdx] || {};
     const early = opts.early || false;
     const accom = opts.accommodations || '';
     const guests = opts.guests || '';
-    // Combine allergies with per-day accommodations
     const allNotes = [allergies, accom].filter(Boolean).join(', ');
     const notesCombined = [generalNotes, guests ? 'Guests: ' + guests : ''].filter(Boolean).join('; ');
     entries.push({ dayIndex: dayIdx, day: day.day, date: day.date, meal: day.meal, time: finalTime, name, diet, allergies: allNotes, early, notes: notesCombined, gradGasman });
   }
 
   try {
-    if (SCRIPT_URL) {
-      const result = await apiCall('addSignups', { monday, entries, caps });
-      if (result.added > 0) {
-        if (result.updated > 0) {
-          showToast(`Sign-ups updated! ${result.added} meal${result.added > 1 ? 's' : ''} confirmed.`);
-          showToast('If you changed your days, re-sign-up for every day you want this week.', 'var(--orange)');
-        } else {
-          showToast(`Signed up for ${result.added} meal${result.added > 1 ? 's' : ''}!`);
-        }
-        if (result.full > 0) showToast(`${result.full} slot(s) were full`, 'var(--orange)');
-      } else if (result.full > 0) {
-        showToast('Those slots are full', 'var(--red)');
+    const result = await apiCall('addSignups', { monday, entries, caps });
+    if (result.added > 0) {
+      if (result.updated > 0) {
+        showToast('Sign-ups updated! ' + result.added + ' meal' + (result.added > 1 ? 's' : '') + ' confirmed.');
+      } else {
+        showToast('Signed up for ' + result.added + ' meal' + (result.added > 1 ? 's' : '') + '!');
       }
-    } else {
-      // Local-only fallback
-      entries.forEach(e => {
-        if (!currentWeekData.signups[e.dayIndex]) currentWeekData.signups[e.dayIndex] = [];
-        currentWeekData.signups[e.dayIndex].push(e);
-      });
-      showToast(`Signed up for ${entries.length} meal${entries.length > 1 ? 's' : ''}! (local only)`);
+      if (result.full > 0) showToast(result.full + ' slot(s) were full', 'var(--orange)');
+    } else if (result.full > 0) {
+      showToast('Those slots are full', 'var(--red)');
     }
     selectedDays.clear();
     selectedTimes = {};
@@ -708,9 +615,9 @@ async function submitSignup() {
   btn.innerHTML = 'Submit Sign-Up';
 }
 
-// ══════════════════════════════════════════════
+// =============================================
 //  VIEW TAB
-// ══════════════════════════════════════════════
+// =============================================
 async function loadViewData() {
   const weekInput = document.getElementById('viewWeekSelect').value;
   if (!weekInput) { document.getElementById('viewContent').innerHTML = '<div class="info-banner">Select a week to view signups.</div>'; return; }
@@ -721,10 +628,12 @@ async function loadViewData() {
 
   let data;
   try {
-    if (SCRIPT_URL) {
-      data = await apiCall('getWeek', { monday });
-    } else {
-      data = weekCache[monday] || buildDefaultWeek(monday);
+    data = await apiCall('getWeek', { monday });
+    // Load caps from config if available
+    if (data.caps) {
+      caps.slot12 = data.caps.slot12 || 50;
+      caps.slot1 = data.caps.slot1 || 50;
+      caps.dinner = data.caps.dinner || 50;
     }
   } catch (e) {
     data = weekCache[monday] || buildDefaultWeek(monday);
@@ -740,30 +649,28 @@ async function loadViewData() {
     const times = DEFAULT_TIMES[day.meal] || ['12:00 PM'];
     const maxTotal = times.reduce((s, t) => s + getCapForSlot(t), 0);
 
-    html += `<div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:start;">
-        <div>
-          <div class="card-title">${day.day} — ${day.meal}</div>
-          <div class="card-sub">${new Date(day.date + 'T12:00:00').toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})} · ${sups.length}/${maxTotal} signed up</div>
-        </div>
-        <span class="tag ${sups.length >= maxTotal ? 'tag-red' : sups.length > maxTotal * 0.8 ? 'tag-orange' : 'tag-green'}">${sups.length >= maxTotal ? 'FULL' : 'OPEN'}</span>
-      </div>`;
-    if (day.menu) html += `<div class="menu-display"><strong>Menu:</strong> ${day.menu}</div>`;
+    html += '<div class="card">' +
+      '<div style="display:flex;justify-content:space-between;align-items:start;">' +
+        '<div>' +
+          '<div class="card-title">' + day.day + ' — ' + day.meal + '</div>' +
+          '<div class="card-sub">' + new Date(day.date + 'T12:00:00').toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'}) + ' &middot; ' + sups.length + '/' + maxTotal + ' signed up</div>' +
+        '</div>' +
+        '<span class="tag ' + (sups.length >= maxTotal ? 'tag-red' : sups.length > maxTotal * 0.8 ? 'tag-orange' : 'tag-green') + '">' + (sups.length >= maxTotal ? 'FULL' : 'OPEN') + '</span>' +
+      '</div>';
+    if (day.menu) html += '<div class="menu-display"><strong>Menu:</strong> ' + day.menu + '</div>';
 
     if (sups.length === 0) {
-      html += `<div style="color:var(--text-dim);font-size:13px;padding:12px 0;">No signups yet.</div>`;
+      html += '<div style="color:var(--text-dim);font-size:13px;padding:12px 0;">No signups yet.</div>';
     } else {
-      // Group by time slot first, then by diet category within each slot
       const slots = DEFAULT_TIMES[day.meal] || ['12:00 PM'];
       slots.forEach(slot => {
-        const slotLabel = slot === '12:00 PM' ? '12:00–1:00 PM' : slot === '1:00 PM' ? '1:00–2:00 PM' : slot;
+        const slotLabel = slot === '12:00 PM' ? '12:00\u20131:00 PM' : slot === '1:00 PM' ? '1:00\u20132:00 PM' : slot;
         const slotSups = sups.filter(s => {
           const t = (s.time || '').toString();
-          // Handle the 1899 date bug from Google Sheets
           if (t.indexOf('1899') !== -1 || t.indexOf('GMT') !== -1) {
             try {
               const d = new Date(t);
-              const h = d.getUTCHours !== undefined ? d.getHours() : 12;
+              const h = d.getHours();
               if (slot === '12:00 PM') return h === 12 || h === 0;
               if (slot === '1:00 PM') return h === 13 || h === 1;
               if (slot === '7:30 PM') return h === 19;
@@ -773,23 +680,22 @@ async function loadViewData() {
         });
         const slotCap = getCapForSlot(slot);
 
-        html += `<div style="margin-top:16px;padding:12px 16px;background:var(--surface2);border-radius:12px;border-left:3px solid #5B8DEF;">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-            <span style="font-weight:700;font-size:15px;color:#5B8DEF;">${slotLabel}</span>
-            <span style="font-size:12px;color:var(--text-dim);">${slotSups.length}/${slotCap} signed up</span>
-          </div>`;
+        html += '<div style="margin-top:16px;padding:12px 16px;background:var(--surface2);border-radius:12px;border-left:3px solid #5B8DEF;">' +
+          '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">' +
+            '<span style="font-weight:700;font-size:15px;color:#5B8DEF;">' + slotLabel + '</span>' +
+            '<span style="font-size:12px;color:var(--text-dim);">' + slotSups.length + '/' + slotCap + ' signed up</span>' +
+          '</div>';
 
         if (slotSups.length === 0) {
-          html += `<div style="color:var(--text-dim);font-size:13px;padding:4px 0;">No signups for this time.</div>`;
+          html += '<div style="color:var(--text-dim);font-size:13px;padding:4px 0;">No signups for this time.</div>';
         } else {
-          // Group by category within slot
           const grouped = {};
           CATEGORIES.forEach(c => grouped[c] = []);
           slotSups.forEach(s => {
             const cat = CATEGORIES.includes(s.diet) ? s.diet : 'No Dietary Restrictions';
             grouped[cat].push(s);
           });
-          html += `<div class="signup-list">`;
+          html += '<div class="signup-list">';
           CATEGORIES.forEach(cat => {
             if (grouped[cat].length === 0) return;
             let catColor = 'var(--text-dim)';
@@ -798,7 +704,7 @@ async function loadViewData() {
             if (cat === 'Gluten-Free') catColor = '#E89B3E';
             if (cat === 'No Pork' || cat === 'No Beef') catColor = '#AB47BC';
             if (cat === 'Allergies') catColor = '#E05555';
-            html += `<div style="font-size:11px;font-weight:600;color:${catColor};text-transform:uppercase;letter-spacing:1px;margin:8px 0 4px;">${cat}</div>`;
+            html += '<div style="font-size:11px;font-weight:600;color:' + catColor + ';text-transform:uppercase;letter-spacing:1px;margin:8px 0 4px;">' + cat + '</div>';
             grouped[cat].forEach(s => {
               let display = s.name;
               let tags = [];
@@ -806,44 +712,42 @@ async function loadViewData() {
               if (s.allergies) tags.push(s.allergies);
               if (s.early) tags.push('early');
               if (s.gradGasman) tags.push('Grad Gasman');
-              if (tags.length > 0) display += ` (${tags.join(', ')})`;
+              if (tags.length > 0) display += ' (' + tags.join(', ') + ')';
               let nameColor = 'var(--text-bright)';
               if (s.diet === 'Vegan') nameColor = '#3D7A4E';
               if (s.diet === 'Vegetarian') nameColor = '#5A8A3D';
               const isGrad = s.gradGasman === true || s.gradGasman === 'true' || s.gradGasman === 'TRUE';
               const gradStyle = isGrad ? 'background:#8B691412;border-color:#8B691430;' : '';
-              const gradNameStyle = isGrad ? 'font-weight:800;color:#8B6914;' : `color:${nameColor}`;
-              html += `<div class="signup-item" style="${gradStyle}">
-                <div><span class="name" style="${gradNameStyle}">${display}</span><div class="meta">${s.notes ? s.notes : ''}</div></div>
-                <button class="remove-btn" title="Remove" onclick="removeSignup('${monday}',${i},'${s.name.replace(/'/g,"\\'")}','${s.time || ''}')">×</button>
-              </div>`;
+              const gradNameStyle = isGrad ? 'font-weight:800;color:#8B6914;' : 'color:' + nameColor;
+              html += '<div class="signup-item" style="' + gradStyle + '">' +
+                '<div><span class="name" style="' + gradNameStyle + '">' + display + '</span><div class="meta">' + (s.notes ? s.notes : '') + '</div></div>' +
+                (isAdmin ? '<button class="remove-btn" title="Remove" onclick="removeSignup(\'' + monday + '\',' + i + ',\'' + s.name.replace(/'/g,"\\'") + '\',\'' + (s.time || '') + '\')">&#215;</button>' : '') +
+              '</div>';
             });
           });
-          html += `</div>`;
+          html += '</div>';
         }
-        html += `</div>`;
+        html += '</div>';
       });
     }
-    html += `</div>`;
+    html += '</div>';
   });
 
   document.getElementById('viewContent').innerHTML = html || '<div class="info-banner">No meals configured for this week.</div>';
 }
 
 async function removeSignup(monday, dayIdx, name, time) {
-  if (!confirm(`Remove ${name} from this day?`)) return;
+  if (!confirm('Remove ' + name + ' from this day?')) return;
   try {
-    if (SCRIPT_URL) {
-      await apiCall('removeSignup', { monday, dayIndex: dayIdx, name, time });
-    }
+    await apiCall('removeSignup', { monday, dayIndex: dayIdx, name, time });
     showToast('Removed', 'var(--red)');
     loadViewData();
   } catch (e) {}
 }
 
-// ══════════════════════════════════════════════
+// =============================================
 //  ADMIN — Week Config
-// ══════════════════════════════════════════════
+// =============================================
 let adminWeekData = null;
 
 function shiftWeek(inputId, days, callback) {
@@ -852,12 +756,10 @@ function shiftWeek(inputId, days, callback) {
   if (!current) return;
   const d = new Date(current + 'T12:00:00');
   d.setDate(d.getDate() + days);
-  // Snap to Monday
   const day = d.getDay();
   if (day === 0) d.setDate(d.getDate() - 6);
   else if (day !== 1) d.setDate(d.getDate() - (day - 1));
 
-  // Limit: 2 weeks back, 2 weeks forward from current Monday
   const now = new Date(); now.setHours(12,0,0,0);
   const nowDay = now.getDay();
   const currMon = new Date(now);
@@ -867,7 +769,7 @@ function shiftWeek(inputId, days, callback) {
   const minDate = new Date(currMon); minDate.setDate(minDate.getDate() - 14);
   const maxDate = new Date(currMon); maxDate.setDate(maxDate.getDate() + 14);
 
-  if (d < minDate || d > maxDate) return; // out of range, do nothing
+  if (d < minDate || d > maxDate) return;
 
   el.value = d.toISOString().split('T')[0];
   if (callback) callback();
@@ -883,16 +785,20 @@ async function renderAdminWeek() {
   const monday = getMonday(weekInput);
 
   try {
-    if (SCRIPT_URL) {
-      adminWeekData = await apiCall('getWeek', { monday });
-    } else {
-      adminWeekData = buildDefaultWeek(monday);
+    adminWeekData = await apiCall('getWeek', { monday });
+    // Load caps from sheet config
+    if (adminWeekData.caps) {
+      caps.slot12 = adminWeekData.caps.slot12 || 50;
+      caps.slot1 = adminWeekData.caps.slot1 || 50;
+      caps.dinner = adminWeekData.caps.dinner || 50;
+      document.getElementById('cap12').value = caps.slot12;
+      document.getElementById('cap1').value = caps.slot1;
+      document.getElementById('capDinner').value = caps.dinner;
     }
   } catch (e) {
     adminWeekData = buildDefaultWeek(monday);
   }
 
-  // Load freeze date if saved
   if (adminWeekData.freezeDate) {
     document.getElementById('freezeDate').value = adminWeekData.freezeDate;
   } else {
@@ -903,111 +809,89 @@ async function renderAdminWeek() {
   let html = '';
   config.forEach((day, i) => {
     const guestsAllowed = day.guestsAllowed || false;
-    html += `<div style="border:1px solid var(--border);border-radius:6px;padding:16px;margin-bottom:10px;background:var(--surface2);">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-        <strong style="font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--text-bright);">${day.day} (${new Date(day.date + 'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'})})</strong>
-        <label class="option-pill" style="margin:0;">
-          <input type="checkbox" ${day.enabled !== false ? 'checked' : ''} onchange="adminWeekData.config[${i}].enabled=this.checked">
-          <span class="pill-label" style="font-size:12px;">Enabled</span>
-        </label>
-      </div>
-      <div class="field" style="margin-bottom:12px;">
-        <label class="field-label" style="font-size:10px;">Meal Type</label>
-        <select onchange="adminWeekData.config[${i}].meal=this.value">
-          <option ${day.meal==='Lunch'?'selected':''}>Lunch</option>
-          <option ${day.meal==='Dinner'?'selected':''}>Dinner</option>
-          <option ${day.meal==='Brunch'?'selected':''}>Brunch</option>
-        </select>
-      </div>
-      <div class="field" style="margin-bottom:12px;">
-        <label class="field-label" style="font-size:10px;">Menu Description</label>
-        <textarea style="min-height:56px;" onchange="adminWeekData.config[${i}].menu=this.value">${day.menu || ''}</textarea>
-      </div>
-      <div style="margin-bottom:0;">
-        <label class="option-pill">
-          <input type="checkbox" ${guestsAllowed ? 'checked' : ''} onchange="adminWeekData.config[${i}].guestsAllowed=this.checked">
-          <span class="pill-label" style="font-size:12px;">Guests Allowed</span>
-        </label>
-      </div>
-    </div>`;
+    html += '<div style="border:1px solid var(--border);border-radius:6px;padding:16px;margin-bottom:10px;background:var(--surface2);">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">' +
+        '<strong style="font-family:\'Cormorant Garamond\',serif;font-size:16px;color:var(--text-bright);">' + day.day + ' (' + new Date(day.date + 'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}) + ')</strong>' +
+        '<label class="option-pill" style="margin:0;">' +
+          '<input type="checkbox" ' + (day.enabled !== false ? 'checked' : '') + ' onchange="adminWeekData.config[' + i + '].enabled=this.checked">' +
+          '<span class="pill-label" style="font-size:12px;">Enabled</span>' +
+        '</label>' +
+      '</div>' +
+      '<div class="field" style="margin-bottom:12px;">' +
+        '<label class="field-label" style="font-size:10px;">Meal Type</label>' +
+        '<select onchange="adminWeekData.config[' + i + '].meal=this.value">' +
+          '<option ' + (day.meal==='Lunch'?'selected':'') + '>Lunch</option>' +
+          '<option ' + (day.meal==='Dinner'?'selected':'') + '>Dinner</option>' +
+          '<option ' + (day.meal==='Brunch'?'selected':'') + '>Brunch</option>' +
+        '</select>' +
+      '</div>' +
+      '<div class="field" style="margin-bottom:12px;">' +
+        '<label class="field-label" style="font-size:10px;">Menu Description</label>' +
+        '<textarea style="min-height:56px;" onchange="adminWeekData.config[' + i + '].menu=this.value">' + (day.menu || '') + '</textarea>' +
+      '</div>' +
+      '<div style="margin-bottom:0;">' +
+        '<label class="option-pill">' +
+          '<input type="checkbox" ' + (guestsAllowed ? 'checked' : '') + ' onchange="adminWeekData.config[' + i + '].guestsAllowed=this.checked">' +
+          '<span class="pill-label" style="font-size:12px;">Guests Allowed</span>' +
+        '</label>' +
+      '</div>' +
+    '</div>';
   });
   document.getElementById('adminWeekSetup').innerHTML = html;
 }
 
 async function pushWeekConfig() {
   if (!adminWeekData) { showToast('Select a week first', 'var(--red)'); return; }
-  if (!SCRIPT_URL) { showToast('Connect Google Sheets first', 'var(--red)'); return; }
   try {
     await apiCall('setWeekConfig', { monday: adminWeekData.monday, config: adminWeekData.config, caps, freezeDate: adminWeekData.freezeDate || '' });
     showToast('Week config saved!');
-    // Clear cache so Sign Up and View tabs reload fresh data
     delete weekCache[adminWeekData.monday];
     currentWeekData = null;
-    // If the sign-up tab week matches, reload it
     const signupWeek = document.getElementById('weekSelect').value;
     if (signupWeek && getMonday(signupWeek) === adminWeekData.monday) {
       loadWeekData();
     }
-    // Re-render admin to confirm saved state
     renderAdminWeek();
   } catch (e) {}
 }
 
-// ══════════════════════════════════════════════
+// =============================================
 //  INIT
-// ══════════════════════════════════════════════
+// =============================================
 document.getElementById('cap12').value = caps.slot12;
 document.getElementById('cap1').value = caps.slot1;
 document.getElementById('capDinner').value = caps.dinner;
-document.getElementById('scriptUrl').value = SCRIPT_URL;
 
-// Helper: get the Monday of the current week
 function getCurrentMonday() {
   const d = new Date();
-  d.setHours(12,0,0,0); // avoid timezone issues
-  const day = d.getDay(); // 0=Sun, 1=Mon, ...6=Sat
-  if (day === 0) d.setDate(d.getDate() - 6);      // Sun → prev Mon
-  else d.setDate(d.getDate() - (day - 1));          // Tue-Sat → back to Mon
+  d.setHours(12,0,0,0);
+  const day = d.getDay();
+  if (day === 0) d.setDate(d.getDate() - 6);
+  else d.setDate(d.getDate() - (day - 1));
   return d.toISOString().split('T')[0];
 }
 
-// Helper: get next Monday from today
 function getNextMonday() {
   const d = new Date();
   d.setHours(12,0,0,0);
-  const day = d.getDay(); // 0=Sun, 1=Mon, ...6=Sat
-  if (day === 0) d.setDate(d.getDate() + 1);       // Sun → tomorrow (Mon)
-  else if (day === 1) d.setDate(d.getDate() + 7);   // Mon → next Mon
-  else d.setDate(d.getDate() + (8 - day));           // Tue-Sat → next Mon
+  const day = d.getDay();
+  if (day === 0) d.setDate(d.getDate() + 1);
+  else if (day === 1) d.setDate(d.getDate() + 7);
+  else d.setDate(d.getDate() + (8 - day));
   return d.toISOString().split('T')[0];
 }
 
-// Determine which week to show for sign-ups and viewing
-// Mon-Fri: sign up = next week, view = this week
-// Sat-Sun: both show next week (current week meals are over)
 function getSignupMonday() {
-  const d = new Date();
-  const day = d.getDay();
-  if (day === 0 || day === 6) {
-    // Weekend: show next week for both
-    return getNextMonday();
-  }
-  // Weekday: sign up for next week
   return getNextMonday();
 }
 
 function getViewMonday() {
   const d = new Date();
   const day = d.getDay();
-  if (day === 0 || day === 6) {
-    // Weekend: current week is over, show next week
-    return getNextMonday();
-  }
-  // Weekday: show current week
+  if (day === 0 || day === 6) return getNextMonday();
   return getCurrentMonday();
 }
 
-// Snap date inputs to Monday when changed
 function snapToMonday(inputId, callback) {
   const el = document.getElementById(inputId);
   el.addEventListener('change', () => {
@@ -1020,7 +904,7 @@ function snapToMonday(inputId, callback) {
   });
 }
 
-// Admin mode: show admin tab only if ?admin is in URL and correct password
+// Admin mode
 const isAdmin = (() => {
   if (!new URLSearchParams(window.location.search).has('admin')) return false;
   const stored = sessionStorage.getItem('delphic_admin');
@@ -1044,15 +928,12 @@ document.getElementById('weekSelect').value = signupMon;
 document.getElementById('viewWeekSelect').value = viewMon;
 document.getElementById('adminWeekSelect').value = adminMon;
 
-// Snap all date inputs to Mondays
 snapToMonday('weekSelect', loadWeekData);
 snapToMonday('viewWeekSelect', loadViewData);
 snapToMonday('adminWeekSelect', renderAdminWeek);
 
-updateConnectionUI();
 loadWeekData();
-// Auto-load admin week config if in admin mode
-if (isAdmin && SCRIPT_URL) { renderAdminWeek(); }
+if (isAdmin) { renderAdminWeek(); }
 </script>
 </body>
 </html>
