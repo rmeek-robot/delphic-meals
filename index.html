@@ -145,6 +145,28 @@
   .connected .status-dot { background: var(--green); }
   .disconnected .status-dot { background: var(--red); }
 
+  /* Calendar */
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin-bottom: 8px; }
+  .cal-header { padding: 8px 4px; text-align: center; font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-dim); }
+  .cal-day { min-height: 72px; padding: 6px 8px; background: var(--surface); border: 1px solid var(--border); border-radius: 3px; font-size: 12px; cursor: default; transition: all .2s; }
+  .cal-day:hover { border-color: var(--border-light); }
+  .cal-day.today { border-color: var(--accent); background: var(--accent-glow2); }
+  .cal-day.other-month { opacity: .35; }
+  .cal-day .cal-num { font-weight: 600; color: var(--text-bright); margin-bottom: 4px; }
+  .cal-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 3px; }
+  .cal-dot.meal { background: var(--accent); }
+  .cal-dot.event { background: #5B8DEF; }
+  .cal-tag { display: inline-block; font-size: 9px; padding: 1px 5px; border-radius: 2px; margin-top: 2px; line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+  .cal-tag.meal-tag { background: #8B691412; color: var(--accent); }
+  .cal-tag.event-tag { background: #5B8DEF15; color: #3B6BC4; cursor: pointer; }
+  .cal-tag.event-tag:hover { background: #5B8DEF25; }
+
+  /* Event cards */
+  .event-card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 24px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.04); border-left: 4px solid #5B8DEF; }
+  .event-card .event-title { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 600; color: var(--text-bright); margin-bottom: 4px; }
+  .event-card .event-meta { font-family: 'Crimson Pro', serif; font-size: 14px; color: var(--text-dim); font-style: italic; margin-bottom: 16px; line-height: 1.6; }
+  .event-card .event-desc { font-family: 'Crimson Pro', serif; font-size: 15px; color: var(--text); line-height: 1.6; margin-bottom: 16px; padding: 12px 16px; background: var(--surface2); border-radius: 4px; border-left: 2px solid #5B8DEF; }
+
   /* Confirmation Modal */
   .confirm-overlay { position: fixed; inset: 0; background: rgba(26,26,26,.55); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); z-index: 1000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity .35s ease; }
   .confirm-overlay.show { opacity: 1; pointer-events: auto; }
@@ -180,6 +202,8 @@
   <div class="tabs">
     <button class="tab active" data-tab="signup">Sign Up</button>
     <button class="tab" data-tab="view">View Signups</button>
+    <button class="tab" data-tab="calendar">Calendar</button>
+    <button class="tab" data-tab="events" id="eventsTabBtn" style="display:none;">Events</button>
     <button class="tab" data-tab="admin" id="adminTabBtn" style="display:none;">Admin</button>
   </div>
 
@@ -261,6 +285,31 @@
     <div id="viewContent"></div>
   </div>
 
+  <!-- ========== CALENDAR ========== -->
+  <div id="tab-calendar" class="section">
+    <div class="card">
+      <div class="card-title">Upcoming Schedule</div>
+      <div class="card-sub">Meals and special events for the weeks ahead</div>
+      <div class="field">
+        <label class="field-label">View Month</label>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button class="btn btn-secondary" style="width:auto;padding:10px 14px;font-size:16px;" onclick="shiftCalMonth(-1)" title="Previous month">&#8592;</button>
+          <div id="calMonthLabel" style="flex:1;text-align:center;font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:var(--text-bright);"></div>
+          <button class="btn btn-secondary" style="width:auto;padding:10px 14px;font-size:16px;" onclick="shiftCalMonth(1)" title="Next month">&#8594;</button>
+        </div>
+      </div>
+    </div>
+    <div id="calLoading" style="display:none;text-align:center;padding:24px;color:var(--text-dim);"><div class="spinner"></div> Loading...</div>
+    <div id="calendarGrid"></div>
+    <div id="calEventsList" style="margin-top:24px;"></div>
+  </div>
+
+  <!-- ========== EVENTS ========== -->
+  <div id="tab-events" class="section">
+    <div id="eventsLoading" style="display:none;text-align:center;padding:24px;color:var(--text-dim);"><div class="spinner"></div> Loading events...</div>
+    <div id="eventsList"></div>
+  </div>
+
   <!-- ========== ADMIN ========== -->
   <div id="tab-admin" class="section">
 
@@ -307,6 +356,53 @@
       <div id="adminWeekSetup"></div>
       <button class="btn btn-secondary" onclick="pushWeekConfig()" style="margin-top:12px;">Save Week Config</button>
     </div>
+
+    <!-- Special Events Admin -->
+    <div class="card">
+      <div class="card-title">Special Events</div>
+      <div class="card-sub">Create and manage special events</div>
+      <div id="adminEventsList"></div>
+      <div style="border:1px solid var(--border);border-radius:6px;padding:16px;margin-top:12px;background:var(--surface2);">
+        <strong style="font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--text-bright);display:block;margin-bottom:12px;">New Event</strong>
+        <div class="field" style="margin-bottom:10px;">
+          <label class="field-label" style="font-size:10px;">Event Title <span class="req">*</span></label>
+          <input type="text" id="newEventTitle" placeholder="e.g. Spring Formal, Alumni Dinner">
+        </div>
+        <div style="display:flex;gap:10px;margin-bottom:10px;">
+          <div class="field" style="flex:1;margin-bottom:0;">
+            <label class="field-label" style="font-size:10px;">Date <span class="req">*</span></label>
+            <input type="date" id="newEventDate">
+          </div>
+          <div class="field" style="flex:1;margin-bottom:0;">
+            <label class="field-label" style="font-size:10px;">Time</label>
+            <input type="text" id="newEventTime" placeholder="e.g. 7:00 PM">
+          </div>
+        </div>
+        <div class="field" style="margin-bottom:10px;">
+          <label class="field-label" style="font-size:10px;">Location</label>
+          <input type="text" id="newEventLocation" placeholder="e.g. Main Dining Room">
+        </div>
+        <div class="field" style="margin-bottom:10px;">
+          <label class="field-label" style="font-size:10px;">Description</label>
+          <textarea id="newEventDesc" style="min-height:56px;" placeholder="Event details, dress code, etc."></textarea>
+        </div>
+        <div style="display:flex;gap:10px;margin-bottom:10px;">
+          <div class="field" style="flex:1;margin-bottom:0;">
+            <label class="field-label" style="font-size:10px;">Capacity (0 = unlimited)</label>
+            <input type="number" id="newEventCap" value="0" min="0">
+          </div>
+          <div class="field" style="flex:1;margin-bottom:0;">
+            <label class="field-label" style="font-size:10px;">Freeze Sign-Ups After</label>
+            <input type="datetime-local" id="newEventFreeze">
+          </div>
+        </div>
+        <div style="display:flex;gap:12px;margin-bottom:12px;">
+          <label class="option-pill"><input type="checkbox" id="newEventGradYear" checked><span class="pill-label" style="font-size:12px;">Collect Grad Year</span></label>
+          <label class="option-pill"><input type="checkbox" id="newEventDiet"><span class="pill-label" style="font-size:12px;">Collect Dietary Info</span></label>
+        </div>
+        <button class="btn btn-primary" onclick="createNewEvent()">Create Event</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -331,7 +427,7 @@
 //  Every visitor (any browser, incognito, any device) uses this same URL.
 //  To change it, update this line and re-upload to GitHub.
 // =============================================
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyw6m1G7b9GQXmqGKkCtVnZ_-wkuTsCfb5M-GAbIogLbWaS09nzX645e1NmNC0oJ63GbQ/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxYlSKFTN_-rQ80oE0J3V-FSWRRMHNSeScRh3VZOC2dnX4M4Zu2JhvUE5jf2T2D_MRcZg/exec';
 
 // Capacity defaults (will be overridden by sheet config when available)
 let caps = { slot12: 50, slot1: 50, dinner: 50 };
@@ -360,18 +456,24 @@ function showToast(msg, color) {
   setTimeout(() => t.classList.remove('show'), 2800);
 }
 
-function showConfirmation(name, daysList, count, wasUpdate) {
+function showConfirmation(name, daysList, count, wasUpdate, isEvent) {
   const overlay = document.getElementById('confirmOverlay');
   const title = document.getElementById('confirmTitle');
   const sub = document.getElementById('confirmSub');
   const days = document.getElementById('confirmDays');
 
   const firstName = name.split(' ')[0];
-  title.textContent = wasUpdate ? 'Sign-Ups Updated' : "You're All Set, " + firstName;
-  sub.textContent = wasUpdate
-    ? 'Your sign-ups have been updated for this week.'
-    : 'Thank you for signing up for this week\u2019s meals.';
-  days.textContent = daysList;
+  if (isEvent) {
+    title.textContent = "You're All Set, " + firstName;
+    sub.textContent = 'You\'re signed up for this event.';
+    days.textContent = '';
+  } else {
+    title.textContent = wasUpdate ? 'Sign-Ups Updated' : "You're All Set, " + firstName;
+    sub.textContent = wasUpdate
+      ? 'Your sign-ups have been updated for this week.'
+      : 'Thank you for signing up for this week\u2019s meals.';
+    days.textContent = daysList;
+  }
 
   overlay.classList.add('show');
   document.body.style.overflow = 'hidden';
@@ -430,6 +532,8 @@ document.querySelectorAll('.tab').forEach(t => {
     document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
     document.getElementById('tab-' + id).classList.add('active');
     if (id === 'view') loadViewData();
+    if (id === 'calendar') loadCalendar();
+    if (id === 'events') loadEvents();
   });
 });
 
@@ -907,6 +1011,317 @@ async function pushWeekConfig() {
 }
 
 // =============================================
+//  SPECIAL EVENTS
+// =============================================
+let allEvents = [];
+
+async function loadEvents() {
+  document.getElementById('eventsLoading').style.display = 'block';
+  document.getElementById('eventsList').innerHTML = '';
+  try {
+    const result = await apiCall('getEvents');
+    allEvents = (result.events || []).filter(e => {
+      const d = new Date(e.date + 'T23:59:59');
+      return d >= new Date(new Date().toDateString()); // today or future
+    }).sort((a, b) => new Date(a.date) - new Date(b.date));
+  } catch (e) { allEvents = []; }
+  document.getElementById('eventsLoading').style.display = 'none';
+  renderEventsList();
+  // Show tab if there are events
+  if (allEvents.length > 0) document.getElementById('eventsTabBtn').style.display = '';
+}
+
+function renderEventsList() {
+  let html = '';
+  if (allEvents.length === 0) {
+    html = '<div class="info-banner">No upcoming special events.</div>';
+  }
+  allEvents.forEach(evt => {
+    const dateStr = new Date(evt.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+    const isFull = evt.capacity > 0 && evt.signupCount >= evt.capacity;
+    const isFrozen = evt.freezeDate && Date.now() > new Date(evt.freezeDate).getTime();
+    const spotsText = evt.capacity > 0 ? (evt.signupCount + '/' + evt.capacity + ' signed up') : (evt.signupCount + ' signed up');
+
+    html += '<div class="event-card">' +
+      '<div style="display:flex;justify-content:space-between;align-items:start;">' +
+        '<div class="event-title">' + evt.title + '</div>' +
+        '<span class="tag ' + (isFull ? 'tag-red' : 'tag-green') + '">' + (isFull ? 'FULL' : 'OPEN') + '</span>' +
+      '</div>' +
+      '<div class="event-meta">' + dateStr + (evt.time ? ' at ' + evt.time : '') + (evt.location ? ' &middot; ' + evt.location : '') + ' &middot; ' + spotsText + '</div>';
+    if (evt.description) html += '<div class="event-desc">' + evt.description + '</div>';
+    if (isFrozen) {
+      html += '<div style="background:#B1424210;border:1px solid #B1424230;border-radius:4px;padding:10px 14px;font-family:\'Crimson Pro\',serif;font-size:13px;color:var(--red);margin-bottom:12px;">Sign-ups for this event are closed.</div>';
+    } else if (!isFull) {
+      html += '<div style="border:1px solid var(--border);border-radius:4px;padding:16px;background:var(--surface2);margin-bottom:8px;">' +
+        '<div style="font-family:\'Jost\',sans-serif;font-size:11px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);margin-bottom:10px;">Sign Up for This Event</div>' +
+        '<div class="field" style="margin-bottom:10px;"><label class="field-label" style="font-size:10px;">Name <span class="req">*</span></label>' +
+        '<input type="text" id="evtName_' + evt.eventId + '" placeholder="Your full name"></div>';
+      if (evt.collectGradYear) {
+        html += '<div class="field" style="margin-bottom:10px;"><label class="field-label" style="font-size:10px;">Grad Year <span class="req">*</span></label>' +
+        '<input type="text" id="evtGrad_' + evt.eventId + '" placeholder="e.g. 2026"></div>';
+      }
+      if (evt.collectDiet) {
+        html += '<div class="field" style="margin-bottom:10px;"><label class="field-label" style="font-size:10px;">Dietary Preference</label>' +
+        '<div class="option-grid">' +
+          '<label class="option-pill"><input type="radio" name="evtDiet_' + evt.eventId + '" value="No Dietary Restrictions" checked><span class="pill-label">No Restrictions</span></label>' +
+          '<label class="option-pill"><input type="radio" name="evtDiet_' + evt.eventId + '" value="Vegan"><span class="pill-label">Vegan</span></label>' +
+          '<label class="option-pill"><input type="radio" name="evtDiet_' + evt.eventId + '" value="Vegetarian"><span class="pill-label">Vegetarian</span></label>' +
+          '<label class="option-pill"><input type="radio" name="evtDiet_' + evt.eventId + '" value="Gluten-Free"><span class="pill-label">Gluten-Free</span></label>' +
+        '</div></div>';
+      }
+      html += '<div class="field" style="margin-bottom:10px;"><label class="field-label" style="font-size:10px;">Guests</label>' +
+        '<input type="text" id="evtGuests_' + evt.eventId + '" placeholder="e.g. John Smith, Jane Doe"></div>' +
+        '<div class="field" style="margin-bottom:10px;"><label class="field-label" style="font-size:10px;">Notes</label>' +
+        '<input type="text" id="evtNotes_' + evt.eventId + '" placeholder="Any additional info"></div>' +
+        '<button class="btn btn-primary" onclick="submitEventSignup(\'' + evt.eventId + '\')">Sign Up</button>' +
+      '</div>';
+    }
+    html += '</div>';
+  });
+  document.getElementById('eventsList').innerHTML = html;
+}
+
+async function submitEventSignup(eventId) {
+  const nameEl = document.getElementById('evtName_' + eventId);
+  const name = nameEl ? nameEl.value.trim() : '';
+  if (!name) { showToast('Please enter your name', 'var(--red)'); return; }
+
+  const gradEl = document.getElementById('evtGrad_' + eventId);
+  const gradYear = gradEl ? gradEl.value.trim() : '';
+
+  const dietEl = document.querySelector('input[name="evtDiet_' + eventId + '"]:checked');
+  const diet = dietEl ? dietEl.value : '';
+
+  const guestsEl = document.getElementById('evtGuests_' + eventId);
+  const guests = guestsEl ? guestsEl.value.trim() : '';
+
+  const notesEl = document.getElementById('evtNotes_' + eventId);
+  const notes = notesEl ? notesEl.value.trim() : '';
+
+  try {
+    const result = await apiCall('addEventSignup', { eventId, signup: { name, gradYear, diet, guests, notes } });
+    if (result.status === 'ok') {
+      showConfirmation(name, '', 1, false, true);
+      document.getElementById('confirmSub').textContent = 'You\'re signed up for this event.';
+      document.getElementById('confirmDays').textContent = '';
+      await loadEvents();
+    } else if (result.full) {
+      showToast('This event is full', 'var(--red)');
+    }
+  } catch (e) {}
+}
+
+// Admin: Create event
+async function createNewEvent() {
+  const title = document.getElementById('newEventTitle').value.trim();
+  const date = document.getElementById('newEventDate').value;
+  if (!title || !date) { showToast('Title and date are required', 'var(--red)'); return; }
+  const event = {
+    title,
+    date,
+    time: document.getElementById('newEventTime').value.trim(),
+    location: document.getElementById('newEventLocation').value.trim(),
+    description: document.getElementById('newEventDesc').value.trim(),
+    capacity: parseInt(document.getElementById('newEventCap').value) || 0,
+    collectGradYear: document.getElementById('newEventGradYear').checked,
+    collectDiet: document.getElementById('newEventDiet').checked,
+    freezeDate: document.getElementById('newEventFreeze').value || ''
+  };
+  try {
+    await apiCall('createEvent', { event });
+    showToast('Event created!');
+    document.getElementById('newEventTitle').value = '';
+    document.getElementById('newEventDate').value = '';
+    document.getElementById('newEventTime').value = '';
+    document.getElementById('newEventLocation').value = '';
+    document.getElementById('newEventDesc').value = '';
+    document.getElementById('newEventCap').value = '0';
+    document.getElementById('newEventFreeze').value = '';
+    loadAdminEvents();
+    loadEvents();
+  } catch (e) {}
+}
+
+async function loadAdminEvents() {
+  try {
+    const result = await apiCall('getEvents');
+    const events = (result.events || []).sort((a, b) => new Date(a.date) - new Date(b.date));
+    let html = '';
+    events.forEach(evt => {
+      const dateStr = new Date(evt.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      html += '<div style="border:1px solid var(--border);border-radius:4px;padding:12px 16px;margin-bottom:8px;background:var(--surface);display:flex;justify-content:space-between;align-items:center;">' +
+        '<div><strong style="font-family:\'Crimson Pro\',serif;font-size:15px;">' + evt.title + '</strong><div style="font-size:12px;color:var(--text-dim);">' + dateStr + ' &middot; ' + evt.signupCount + ' signed up</div></div>' +
+        '<button class="remove-btn" title="Delete event" onclick="deleteAdminEvent(\'' + evt.eventId + '\',\'' + evt.title.replace(/'/g, "\\'") + '\')">&#215;</button>' +
+      '</div>';
+    });
+    if (events.length === 0) html = '<div style="color:var(--text-dim);font-size:13px;padding:8px 0;font-style:italic;">No events created yet.</div>';
+    document.getElementById('adminEventsList').innerHTML = html;
+  } catch (e) {}
+}
+
+async function deleteAdminEvent(eventId, title) {
+  if (!confirm('Delete "' + title + '"? This removes all signups.')) return;
+  try {
+    await apiCall('deleteEvent', { eventId });
+    showToast('Event deleted', 'var(--red)');
+    loadAdminEvents();
+    loadEvents();
+  } catch (e) {}
+}
+
+// =============================================
+//  CALENDAR
+// =============================================
+let calYear, calMonth;
+
+function initCalendar() {
+  const now = new Date();
+  calYear = now.getFullYear();
+  calMonth = now.getMonth();
+}
+
+function shiftCalMonth(dir) {
+  calMonth += dir;
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  if (calMonth < 0) { calMonth = 11; calYear--; }
+  // Limit: 2 years out
+  const now = new Date();
+  const maxDate = new Date(now.getFullYear() + 2, now.getMonth(), 1);
+  const minDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const cur = new Date(calYear, calMonth, 1);
+  if (cur > maxDate || cur < minDate) { calMonth -= dir; if (calMonth > 11) { calMonth = 0; calYear++; } if (calMonth < 0) { calMonth = 11; calYear--; } return; }
+  loadCalendar();
+}
+
+async function loadCalendar() {
+  const label = new Date(calYear, calMonth, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  document.getElementById('calMonthLabel').textContent = label;
+  document.getElementById('calLoading').style.display = 'block';
+
+  // Load events
+  let events = [];
+  try {
+    const result = await apiCall('getEvents');
+    events = result.events || [];
+  } catch (e) {}
+
+  // Load meal weeks that overlap this month
+  const firstDay = new Date(calYear, calMonth, 1);
+  const lastDay = new Date(calYear, calMonth + 1, 0);
+  let mealDays = {};
+
+  // Get Mondays that cover this month
+  const mondays = [];
+  const d = new Date(firstDay);
+  d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); // go to Monday of first week
+  while (d <= lastDay) {
+    mondays.push(d.toISOString().split('T')[0]);
+    d.setDate(d.getDate() + 7);
+  }
+
+  for (const mon of mondays) {
+    try {
+      const week = await apiCall('getWeek', { monday: mon });
+      if (week && week.config) {
+        week.config.forEach(day => {
+          if (day.enabled) {
+            mealDays[day.date] = day.meal;
+          }
+        });
+      }
+    } catch (e) {}
+  }
+
+  document.getElementById('calLoading').style.display = 'none';
+  renderCalendar(mealDays, events);
+}
+
+function renderCalendar(mealDays, events) {
+  const today = new Date();
+  const todayStr = today.toISOString().split('T')[0];
+  const firstDay = new Date(calYear, calMonth, 1);
+  const lastDay = new Date(calYear, calMonth + 1, 0);
+  const startDay = (firstDay.getDay() + 6) % 7; // Monday-based
+
+  const dayNames = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  let html = '<div class="cal-grid">';
+  dayNames.forEach(n => { html += '<div class="cal-header">' + n + '</div>'; });
+
+  // Fill in leading days from previous month
+  const prevMonth = new Date(calYear, calMonth, 0);
+  for (let i = startDay - 1; i >= 0; i--) {
+    const dayNum = prevMonth.getDate() - i;
+    html += '<div class="cal-day other-month"><div class="cal-num">' + dayNum + '</div></div>';
+  }
+
+  // This month's days
+  for (let d = 1; d <= lastDay.getDate(); d++) {
+    const dateObj = new Date(calYear, calMonth, d);
+    const dateStr = dateObj.toISOString().split('T')[0];
+    const isToday = dateStr === todayStr;
+
+    html += '<div class="cal-day' + (isToday ? ' today' : '') + '"><div class="cal-num">' + d + '</div>';
+
+    // Meal indicator
+    if (mealDays[dateStr]) {
+      html += '<div class="cal-tag meal-tag">' + mealDays[dateStr] + '</div>';
+    }
+
+    // Event indicators
+    events.forEach(evt => {
+      if (evt.date === dateStr) {
+        html += '<div class="cal-tag event-tag" onclick="showEventFromCal(\'' + evt.eventId + '\')" title="' + evt.title + '">' + evt.title + '</div>';
+      }
+    });
+
+    html += '</div>';
+  }
+
+  // Trailing days
+  const totalCells = startDay + lastDay.getDate();
+  const remaining = (7 - (totalCells % 7)) % 7;
+  for (let i = 1; i <= remaining; i++) {
+    html += '<div class="cal-day other-month"><div class="cal-num">' + i + '</div></div>';
+  }
+
+  html += '</div>';
+  document.getElementById('calendarGrid').innerHTML = html;
+
+  // Events list below calendar
+  const monthEvents = events.filter(e => {
+    const ed = new Date(e.date + 'T12:00:00');
+    return ed.getMonth() === calMonth && ed.getFullYear() === calYear && ed >= new Date(new Date().toDateString());
+  }).sort((a, b) => new Date(a.date) - new Date(b.date));
+
+  let evtHtml = '';
+  if (monthEvents.length > 0) {
+    evtHtml += '<div class="card"><div class="card-title">Special Events This Month</div><div class="card-sub">Click to sign up</div>';
+    monthEvents.forEach(evt => {
+      const dateStr = new Date(evt.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+      const spotsText = evt.capacity > 0 ? (evt.signupCount + '/' + evt.capacity) : evt.signupCount + ' signed up';
+      evtHtml += '<div style="border:1px solid var(--border);border-radius:4px;padding:12px 16px;margin-bottom:8px;background:var(--surface);cursor:pointer;border-left:3px solid #5B8DEF;" onclick="showEventFromCal(\'' + evt.eventId + '\')">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;">' +
+          '<div><strong style="font-family:\'Crimson Pro\',serif;font-size:15px;color:var(--text-bright);">' + evt.title + '</strong>' +
+          '<div style="font-size:12px;color:var(--text-dim);">' + dateStr + (evt.time ? ' at ' + evt.time : '') + '</div></div>' +
+          '<span style="font-size:11px;color:var(--text-dim);">' + spotsText + '</span>' +
+        '</div></div>';
+    });
+    evtHtml += '</div>';
+  }
+  document.getElementById('calEventsList').innerHTML = evtHtml;
+}
+
+function showEventFromCal(eventId) {
+  // Switch to events tab and scroll to event
+  document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+  document.querySelector('[data-tab="events"]').classList.add('active');
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('tab-events').classList.add('active');
+  document.getElementById('eventsTabBtn').style.display = '';
+  loadEvents();
+}
+
+// =============================================
 //  INIT
 // =============================================
 document.getElementById('cap12').value = caps.slot12;
@@ -984,7 +1399,13 @@ snapToMonday('viewWeekSelect', loadViewData);
 snapToMonday('adminWeekSelect', renderAdminWeek);
 
 loadWeekData();
-if (isAdmin) { renderAdminWeek(); }
+if (isAdmin) { renderAdminWeek(); loadAdminEvents(); }
+
+// Initialize calendar
+initCalendar();
+
+// Load events to check if Events tab should be visible
+loadEvents();
 </script>
 </body>
 </html>
